@@ -11,7 +11,7 @@ import (
 )
 
 // get version from ENV variable VERSION
-var version = os.Getenv("VERSION") // VERSION=1.2.3 go run src/main.go
+var Version = "development"
 
 type Position struct {
 	Id    string `json:"id"`
@@ -26,7 +26,7 @@ func main() {
 	reg := prometheus.NewRegistry()
 	m := NewMetrics(reg)
 
-	m.info.With(prometheus.Labels{"version": version}).Set(1)
+	m.info.With(prometheus.Labels{"version": Version}).Set(1)
 
 	dMux := http.NewServeMux()
 	dMux.HandleFunc("/positions", positionsHandler)
@@ -59,7 +59,7 @@ func envHandler(w http.ResponseWriter, r *http.Request) {
 func versionHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"version": version})
+	json.NewEncoder(w).Encode(map[string]string{"version": Version})
 }
 
 func positionsHandler(w http.ResponseWriter, r *http.Request) {
