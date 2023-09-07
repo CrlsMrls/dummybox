@@ -31,5 +31,6 @@ Build and publish the container image:
 
 ```bash
 VERSION=$(cat VERSION) KO_DOCKER_REPO=crlsmrls ko publish -B -t $(cat VERSION) -t latest . 
+VERSION=$(cat VERSION) KO_DOCKER_REPO=ko.local ko publish -B -t $(cat VERSION) -t latest . 
 ```
 

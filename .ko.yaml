@@ -4,6 +4,5 @@ defaultPlatforms:
 builds:
 - id: dummybox
   dir: .
-  main: ./src
   ldflags:
   - -X main.Version={{.Env.VERSION}} # inject version
