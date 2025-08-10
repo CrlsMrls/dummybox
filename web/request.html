@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DummyBox Request Info</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.*/css/pico.min.css">
+    <style>
+        body { padding: 20px; }
+        details { margin-bottom: 10px; }
+        .copy-button {
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.8em;
+            color: var(--pico-primary);
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <hgroup>
+            <h1>DummyBox Request Information</h1>
+            <h2>Detailed insights into the current HTTP request</h2>
+        </hgroup>
+
+        <section>
+            <details open>
+                <summary>General</summary>
+                <ul>
+                    <li>Method: {{ .Method }} <span class="copy-button" data-copy="{{ .Method }}">📋</span></li>
+                    <li>URL: {{ .URL }} <span class="copy-button" data-copy="{{ .URL }}">📋</span></li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>Headers</summary>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Value</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range $key, $values := .Headers }}
+                        <tr>
+                            <td>{{ $key }}</td>
+                            <td>
+                                {{ range $index, $value := $values }}
+                                    {{ $value }}
+                                    {{ if ne (len $values) 1 }}
+                                        {{ if ne $index (sub (len $values) 1) }}<br>{{ end }}
+                                    {{ end }}
+                                {{ end }}
+                            </td>
+                            <td><span class="copy-button" data-copy="{{ range $values }}{{ . }}{{ end }}">📋</span></td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </details>
+
+            <details>
+                <summary>Query Parameters</summary>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Value</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ range $key, $values := .QueryParameters }}
+                        <tr>
+                            <td>{{ $key }}</td>
+                            <td>
+                                {{ range $index, $value := $values }}
+                                    {{ $value }}
+                                    {{ if ne (len $values) 1 }}
+                                        {{ if ne $index (sub (len $values) 1) }}<br>{{ end }}
+                                    {{ end }}
+                                {{ end }}
+                            </td>
+                            <td><span class="copy-button" data-copy="{{ range $values }}{{ . }}{{ end }}">📋</span></td>
+                        </tr>
+                        {{ end }}
+                    </tbody>
+                </table>
+            </details>
+
+            <details>
+                <summary>Body</summary>
+                {{ if .Body }}
+                    <pre><code class="language-json">{{ .Body }}</code></pre>
+                    <span class="copy-button" data-copy="{{ .Body }}">📋</span>
+                {{ else }}
+                    <p>No request body.</p>
+                {{ end }}
+            </details>
+
+            {{ if .JWT }}
+            <details>
+                <summary>JWT Token</summary>
+                <h4>Header</h4>
+                <pre><code class="language-json">{{ .JWT.Header | jsonify }}</code></pre>
+                <span class="copy-button" data-copy="{{ .JWT.Header | jsonify }}">📋</span>
+
+                <h4>Payload</h4>
+                <pre><code class="language-json">{{ .JWT.Payload | jsonify }}</code></pre>
+                <span class="copy-button" data-copy="{{ .JWT.Payload | jsonify }}">📋</span>
+
+                <h4>Signature</h4>
+                <pre><code class="language-json">{{ .JWT.Signature }}</code></pre>
+                <span class="copy-button" data-copy="{{ .JWT.Signature }}">📋</span>
+            </details>
+            {{ end }}
+        </section>
+
+        <footer>
+            <small>Powered by DummyBox</small>
+        </footer>
+    </main>
+
+    <script>
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const textToCopy = button.getAttribute('data-copy');
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert('Copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            });
+        });
+
+        // Function to pretty print JSON
+        function prettyPrintJson(json) {
+            try {
+                return JSON.stringify(JSON.parse(json), null, 2);
+            } catch (e) {
+                return json; // Return original if not valid JSON
+            }
+        }
+
+        // Apply pretty printing to code blocks with language-json class
+        document.querySelectorAll('code.language-json').forEach(block => {
+            block.textContent = prettyPrintJson(block.textContent);
+        });
+    </script>
+</body>
+</html>

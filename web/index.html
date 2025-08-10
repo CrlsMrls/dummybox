@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DummyBox</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.*/css/pico.min.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+
+        details {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <hgroup>
+            <h1>DummyBox</h1>
+            <h2>A simple HTTP server for testing HTTP in a Kubernetes cluster</h2>
+        </hgroup>
+
+        <section>
+            <h3>Application Information</h3>
+            <p>Version: {{ .Version }}</p>
+            <p>Go Version: {{ .GoVersion }}</p>
+            <p>Build Date: {{ .BuildDate }}</p>
+            <p>Git Commit: {{ .GitCommit }}</p>
+        </section>
+
+        <section>
+            <h3>Available Endpoints</h3>
+            <ul>
+                <li><a href="/healthz">/healthz</a> - Health check</li>
+                <li><a href="/readyz">/readyz</a> - Readiness check</li>
+                <li><a href="/info">/info</a> - Application and system information</li>
+                <li><a href="/request">/request</a> - Request details</li>
+                <li><a href="/metrics">/metrics</a> - Prometheus metrics</li>
+                <li><a href="/delay">/delay</a> - Introduce a delay</li>
+                <li><a href="/log">/log</a> - Generate log messages</li>
+                <li><a href="/memory">/memory</a> - Simulate memory utilization</li>
+                <li><a href="/cpu">/cpu</a> - Simulate CPU utilization</li>
+                <li><a href="/kill">/kill</a> - Terminate the application</li>
+                <li><a href="/commands-ui">/commands-ui</a> - Web UI for commands</li>
+            </ul>
+        </section>
+
+        <footer>
+            <small>Powered by DummyBox</small>
+        </footer>
+    </main>
+
+    <script>
+        // Basic JavaScript for interactivity (e.g., copy to clipboard)
+        document.querySelectorAll('[data-copy]').forEach(button => {
+            button.addEventListener('click', () => {
+                const textToCopy = button.getAttribute('data-copy');
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert('Copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

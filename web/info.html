@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DummyBox Info</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.*/css/pico.min.css">
+    <style>
+        body { padding: 20px; }
+        details { margin-bottom: 10px; }
+        .copy-button {
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.8em;
+            color: var(--pico-primary);
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <hgroup>
+            <h1>DummyBox Information</h1>
+            <h2>Detailed application and system insights</h2>
+        </hgroup>
+
+        <section>
+            <details open>
+                <summary>Application</summary>
+                <ul>
+                    <li>Version: {{ .Application.Version }} <span class="copy-button" data-copy="{{ .Application.Version }}">📋</span></li>
+                    <li>Build Date: {{ .Application.BuildDate }} <span class="copy-button" data-copy="{{ .Application.BuildDate }}">📋</span></li>
+                    <li>Go Version: {{ .Application.GoVersion }} <span class="copy-button" data-copy="{{ .Application.GoVersion }}">📋</span></li>
+                    <li>Git Commit: {{ .Application.GitCommit }} <span class="copy-button" data-copy="{{ .Application.GitCommit }}">📋</span></li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>Process</summary>
+                <ul>
+                    <li>PID: {{ .Process.Pid }} <span class="copy-button" data-copy="{{ .Process.Pid }}">📋</span></li>
+                    <li>Start Time: {{ .Process.StartTime }} <span class="copy-button" data-copy="{{ .Process.StartTime }}">📋</span></li>
+                    <li>Uptime: {{ .Process.Uptime }} <span class="copy-button" data-copy="{{ .Process.Uptime }}">📋</span></li>
+                    <li>OS: {{ .Process.OS }} <span class="copy-button" data-copy="{{ .Process.OS }}">📋</span></li>
+                    <li>Arch: {{ .Process.Arch }} <span class="copy-button" data-copy="{{ .Process.Arch }}">📋</span></li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>User</summary>
+                <ul>
+                    <li>UID: {{ .User.UID }} <span class="copy-button" data-copy="{{ .User.UID }}">📋</span></li>
+                    <li>GID: {{ .User.GID }} <span class="copy-button" data-copy="{{ .User.GID }}">📋</span></li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>Cluster Position</summary>
+                <ul>
+                    <li>Container ID: {{ .ClusterPosition.ContainerID }} <span class="copy-button" data-copy="{{ .ClusterPosition.ContainerID }}">📋</span></li>
+                    <li>Image Name: {{ .ClusterPosition.ImageName }} <span class="copy-button" data-copy="{{ .ClusterPosition.ImageName }}">📋</span></li>
+                    <li>Image Tag: {{ .ClusterPosition.ImageTag }} <span class="copy-button" data-copy="{{ .ClusterPosition.ImageTag }}">📋</span></li>
+                    <li>Node Name: {{ .ClusterPosition.NodeName }} <span class="copy-button" data-copy="{{ .ClusterPosition.NodeName }}">📋</span></li>
+                    <li>Pod Name: {{ .ClusterPosition.PodName }} <span class="copy-button" data-copy="{{ .ClusterPosition.PodName }}">📋</span></li>
+                    <li>Namespace: {{ .ClusterPosition.Namespace }} <span class="copy-button" data-copy="{{ .ClusterPosition.Namespace }}">📋</span></li>
+                    <li>Resource Limits: {{ .ClusterPosition.ResourceLimits }} <span class="copy-button" data-copy="{{ .ClusterPosition.ResourceLimits }}">📋</span></li>
+                    <li>Resource Requests: {{ .ClusterPosition.ResourceRequests }} <span class="copy-button" data-copy="{{ .ClusterPosition.ResourceRequests }}">📋</span></li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>Metrics Summary</summary>
+                <p>{{ .Metrics.Summary }}</p>
+            </details>
+        </section>
+
+        <footer>
+            <small>Powered by DummyBox</small>
+        </footer>
+    </main>
+
+    <script>
+        document.querySelectorAll('.copy-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const textToCopy = button.getAttribute('data-copy');
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert('Copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

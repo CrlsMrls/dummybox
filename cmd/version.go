@@ -1,14 +1,18 @@
 package cmd
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
-var Version = "development"
+// Application information, populated at build time
+var (
+	Version   = "development"
+	BuildDate = "unknown"
+	GoVersion = "unknown"
+	GitCommit = "unknown"
+)
 
 func VersionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"version": Version})
+	fmt.Fprintf(w, "Version: %s\n", Version)
 }

@@ -5,4 +5,4 @@ builds:
 - id: dummybox
   dir: .
   ldflags:
-  - -X main.Version={{.Env.VERSION}} # inject version
+  - -X github.com/crlsmrls/dummybox/cmd.Version={{.Env.VERSION}} # inject version

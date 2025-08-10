@@ -1,27 +1,27 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/crlsmrls/dummybox/cmd"
+	"github.com/crlsmrls/dummybox/config"
+	"github.com/crlsmrls/dummybox/logger"
+	"github.com/crlsmrls/dummybox/metrics"
+	"github.com/crlsmrls/dummybox/server"
+	"github.com/rs/zerolog/log"
 )
 
-// get version from ENV variable VERSION
-var Version = "development"
-
 func main() {
-	cmd.Version = Version
+	cfg, err := config.New()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to load configuration")
+	}
 
-	dMux := http.NewServeMux()
-	dMux.HandleFunc("/positions", cmd.PositionsHandler)
-	dMux.HandleFunc("/version", cmd.VersionHandler)
-	dMux.HandleFunc("/info", cmd.InfoHandler)
+	logger.InitLogger(cfg.LogLevel, nil)
 
-	go func() {
-		log.Default().Println("Server running on port 8080")
-		log.Fatal(http.ListenAndServe(":8080", dMux))
-	}()
+	log.Info().Interface("config", cfg).Msg("configuration loaded")
 
-	select {}
+	reg := metrics.InitMetrics()
+
+	srv := server.New(cfg, nil, reg)
+	if err := srv.Start(); err != nil {
+		log.Fatal().Err(err).Msg("server stopped with error")
+	}
 }
