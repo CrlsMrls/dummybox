@@ -107,37 +107,16 @@ The log endpoint generates structured log messages for testing:
 
 | Parameter | Type | Required | Default | Valid Values | Description |
 |-----------|------|----------|---------|--------------|-------------|
-| `level` | string | No | `info` | `info`, `warning`, `error`, `random` | Log level for the generated message |
-| `size` | string | No | `short` | `short`, `medium`, `long`, `random` | Size category of the generated message |
-| `message` | string | No | (auto-generated) | Any string | Custom message to log (takes precedence over size) |
+| `level` | string | No | `info` | `info`, `warning`, `error`, `random` | Log level for the message |
+| `size` | string | No | `short` | `short`, `medium`, `long`, `random` | Size category of the randomly generated message |
+| `message` | string | No | (self-generated) | Any string | Custom message to log (takes precedence over size) |
 | `interval` | integer | No | `0` | 0-3600 | Seconds between log entries (0 = log once) |
 | `duration` | integer | No | `0` | 0-86400 | Total duration in seconds to generate logs (0 = indefinitely) |
 | `correlation` | string | No | `true` | `true`, `false` | Whether to include correlation ID in log entries |
 
-### Parameter Validation
-- `level`: Invalid values default to `info`
-- `size`: Invalid values default to `short`
-- `interval`: Values outside 0-3600 range are reset to 0
-- `duration`: Values outside 0-86400 range are reset to 0 (max 24 hours)
-- `message`: If provided, takes precedence over auto-generated messages
-- `correlation`: Set to "false" to exclude correlation ID from log entries
 
-### Log Output Behavior
+Interval Logging
 
-#### Output Streams
-- **info level**: Logs to `stdout`
-- **warning level**: Logs to `stderr`
-- **error level**: Logs to `stderr`
-
-#### Message Sizes
-- **short**: 8-20 words, simple operational messages
-  - Example: "System operational", "Task completed", "Connection established"
-- **medium**: 15-50 words, detailed status messages
-  - Example: "Database connection pool initialized with 10 connections, ready to serve requests"
-- **long**: 100+ words, comprehensive diagnostic messages
-  - Example: "System performance analysis completed: CPU usage averaged 35% over the last hour..."
-
-#### Interval Logging
 - `interval=0`: Generates one log entry immediately
 - `interval>0`: Generates log entries continuously at the specified interval in background
 - Background logging runs in separate goroutines and continues until the server stops
@@ -165,10 +144,11 @@ curl "http://localhost:8080/log?level=error&size=medium&interval=30&token=your-t
 curl "http://localhost:8080/log?level=info&message=Heartbeat&interval=5&token=your-token"
 ```
 
-#### POST Request with JSON Body
+#### POST Request with JSON Body and Correlation ID
 ```bash
 curl -X POST "http://localhost:8080/log" \
   -H "Content-Type: application/json" \
+  -H "X-Correlation-ID: log-test-scenario-001"
   -H "X-Auth-Token: your-token" \
   -d '{
     "level": "warning",
@@ -178,26 +158,10 @@ curl -X POST "http://localhost:8080/log" \
   }'
 ```
 
-#### With Correlation ID
-```bash
-curl "http://localhost:8080/log?level=info&size=short&token=your-token" \
-  -H "X-Correlation-ID: log-test-scenario-001"
-```
-
 ### Response Examples
 
-#### Successful Response
-```json
-{
-  "level": "warning",
-  "size": "medium", 
-  "message": "Database connection pool initialized with 10 connections, ready to serve requests",
-  "interval": 0,
-  "status": "log generation started"
-}
-```
+Successful Response
 
-#### Interval Logging Response
 ```json
 {
   "level": "error",
@@ -205,18 +169,6 @@ curl "http://localhost:8080/log?level=info&size=short&token=your-token" \
   "message": "System performance analysis completed: CPU usage averaged 35%...",
   "interval": 30,
   "status": "log generation started"
-}
-```
-
-### Log Entry Format
-
-All generated log entries use structured JSON format with the following fields:
-
-```json
-{
-  "level": "info",
-  "time": "2025-09-19T15:24:39+02:00",
-  "message": "System operational"
 }
 ```
 
@@ -232,53 +184,111 @@ When correlation ID is provided:
 
 ---
 
-## Error Responses
+## `/memory` - Memory Utilization Generator
 
-### Authentication Errors
+The `/memory` endpoint allows you to simulate memory utilization by allocating specified amounts of memory for a given duration. This is useful for:
+
+- Testing application behavior under memory pressure
+- Triggering memory-based alerts and monitoring
+- Simulating out-of-memory conditions
+
+### HTTP Methods
+- `GET`: Parameters passed as query parameters
+- `POST`: Parameters passed in JSON request body
+
+### Parameters
+
+| Parameter | Type | Required | Default | Valid Values | Description |
+|-----------|------|----------|---------|--------------|-------------|
+| `size` | integer | No | `100` | 1-8192 | Memory to allocate in MB (max 8GB) |
+| `duration` | integer | No | `60` | 0-3600 | Duration to hold memory in seconds (0 = forever) |
+
+
+### Memory Allocation Behavior
+
+#### Allocation Strategy
+- Memory is allocated in 10MB chunks to avoid large contiguous allocation issues
+- Each allocation gets a unique key for tracking: `YYYYMMDD-HHMMSS-{size}`
+- Memory is filled with data to prevent compiler optimizations
+- Multiple concurrent allocations are supported
+
+#### Duration Management
+- `duration=0`: Memory remains allocated until server restart or manual cleanup
+- `duration>0`: Memory is automatically freed after the specified time
+- Context cancellation (client disconnect) triggers immediate cleanup
+
+#### Memory Statistics
+- Real-time heap size monitoring via `runtime.MemStats`
+- Active allocation tracking with unique keys
+- Automatic garbage collection after deallocation
+
+### Request Examples
+
+#### GET Request - Allocate Memory
 ```bash
-# Missing token when required
-HTTP/1.1 401 Unauthorized
-Unauthorized: token required
+# Allocate 50MB for 30 seconds
+curl "http://localhost:8080/memory?size=50&duration=30&token=your-token"
 
-# Invalid token
-HTTP/1.1 401 Unauthorized  
-Unauthorized: invalid token
+# Allocate 200MB indefinitely
+curl "http://localhost:8080/memory?size=200&duration=0&token=your-token"
+
+# Get text format response
+curl "http://localhost:8080/memory?size=100&format=text&token=your-token"
 ```
 
-### Validation Errors
+#### POST Request - JSON Body
 ```bash
-# Invalid JSON in POST request
-HTTP/1.1 400 Bad Request
-Invalid JSON body
+# Allocate memory using JSON payload
+curl -X POST "http://localhost:8080/memory?token=your-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "size": 150,
+    "duration": 45
+  }'
 ```
 
----
+### Response Examples
 
-## Testing and Monitoring Use Cases
+#### JSON Response (Default)
+```json
+{
+  "size_mb": 100,
+  "duration": 60,
+  "allocation_key": "20250919-162329-100",
+  "current_heap_mb": 105.47,
+  "message": "Allocated 100MB of memory for 60 seconds"
+}
+```
 
-### Load Testing
+#### Text Response (`format=text`)
+```
+Allocated 100MB of memory for 60 seconds
+Current heap size: 105.47MB
+Allocation key: 20250919-162329-100
+```
+
+### Memory Testing Use Cases
+
+#### OOM Testing
 ```bash
-# Test timeout handling with various delays
-for delay in 1 2 5 10; do
-  curl "http://localhost:8080/delay?duration=$delay&token=your-token"
+# Gradually increase memory usage
+for size in 100 500 1000 2000; do
+  curl "http://localhost:8080/memory?size=$size&duration=0&token=your-token"
+  sleep 5
 done
 ```
 
-### Log Monitoring Testing
+#### Memory Pressure Testing
 ```bash
-# Generate continuous error logs for alert testing
-curl "http://localhost:8080/log?level=error&interval=60&token=your-token"
-
-# Generate burst of warning logs
-for i in {1..10}; do
-  curl "http://localhost:8080/log?level=warning&message=Burst%20test%20$i&token=your-token"
+# Create multiple concurrent allocations
+for i in {1..5}; do
+  curl "http://localhost:8080/memory?size=200&duration=120&token=your-token" &
 done
+wait
 ```
 
-### Performance Testing
+#### Kubernetes Resource Limit Testing
 ```bash
-# Test various response codes for monitoring
-for code in 200 201 400 500 503; do
-  curl "http://localhost:8080/delay?code=$code&token=your-token"
-done
+# Test near resource limits (adjust based on your limits)
+curl "http://localhost:8080/memory?size=1900&duration=300&token=your-token"
 ```

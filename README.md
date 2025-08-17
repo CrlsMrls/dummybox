@@ -1,6 +1,10 @@
 # DummyBox
 
-DummyBox is a lightweight HTTP server designed for testing and validating containerized environments like Kubernetes clusters. It provides various endpoints to simulate different application behaviors, making it ideal for testing monitoring systems, cluster configurations, and network connectivity.
+DummyBox is a lightweight HTTP server designed for testing and validating containerized environments like Kubernetes clusters. It provides various endpoints to simulate different application behaviors, making it ideal for testing monitoring systems, cluster configurations, and network connectivity. 
+
+Commands that affect the system state (like memory allocation) can be protected with a simple token-based authentication mechanism.
+
+A User Interface is also provided to interact with the endpoints through a web browser, although the main focus is on HTTP API usage.
 
 DummyBox serves as a "dummy" application that can:
 - **Mock HTTP responses** with custom status codes and delays
@@ -97,108 +101,39 @@ DummyBox provides several command endpoints for testing different scenarios. The
 
 ### `/delay` - Response Delay Simulation
 
-The delay endpoint allows you to introduce configurable delays in responses, useful for testing timeout handling, latency scenarios, and load balancing behavior.
+Introduces configurable delays in responses for testing timeout handling and latency scenarios.
 
-**Purpose**: Simulate network latency, slow backends, or timeout scenarios
-
-**HTTP Methods**: `GET`, `POST`
-
-**Authentication**: Required if `auth-token` is configured
-
-**Parameters**:
-
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `duration` | integer | No | `0` | Delay duration in seconds (0-300) |
-| `code` | integer | No | `200` | HTTP status code to return (100-599) |
-| `format` | string | No | `json` | Response format: `json` or `text` |
-
-**Usage Examples**:
+**Parameters**: `duration` (0-300s), `code` (HTTP status), `format` (json/text)
 
 ```bash
-# GET request with 2-second delay and 201 status code
 curl "http://localhost:8080/delay?duration=2&code=201&token=your-token"
-
-# POST request with JSON body
-curl -X POST "http://localhost:8080/delay" \
-  -H "Content-Type: application/json" \
-  -H "X-Auth-Token: your-token" \
-  -d '{"duration": 5, "code": 500}'
-
-# Text format response
-curl "http://localhost:8080/delay?duration=1&format=text&token=your-token"
 ```
 
-**Response Example**:
-```json
-{
-  "duration": 2,
-  "code": 201,
-  "message": "Delayed for 2 seconds with status code 201"
-}
-```
+> 📖 **See [COMMANDS.md](COMMANDS.md) for detailed documentation and examples**
 
 ### `/log` - Log Generation
 
-The log endpoint generates log messages with configurable levels and content, useful for testing log aggregation systems, monitoring alerts, and structured logging pipelines.
+Generates structured log messages for testing log aggregation systems and monitoring alerts.
 
-**Purpose**: Generate test logs for validating logging systems, alerts, and log processing pipelines
-
-**HTTP Methods**: `GET`, `POST`
-
-**Authentication**: Required if `auth-token` is configured
-
-**Parameters**:
-
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `level` | string | No | `info` | Log level: `info`, `warning`, or `error` |
-| `size` | string | No | `short` | Message size: `short`, `medium`, or `long` |
-| `message` | string | No | (generated) | Custom message to log (URL-encoded for GET) |
-| `interval` | integer | No | `0` | Seconds between logs (0 = log once, max 3600) |
-
-**Usage Examples**:
+**Parameters**: `level` (info/warning/error), `size` (short/medium/long), `message` (custom), `interval` (0-3600s), `duration` (0-86400s), `correlation` (true/false)
 
 ```bash
-# Generate a single info log with short message
-curl "http://localhost:8080/log?level=info&size=short&token=your-token"
-
-# Generate error logs every 30 seconds
 curl "http://localhost:8080/log?level=error&interval=30&token=your-token"
-
-# POST request with custom message
-curl -X POST "http://localhost:8080/log" \
-  -H "Content-Type: application/json" \
-  -H "X-Auth-Token: your-token" \
-  -d '{"level": "warning", "size": "medium", "message": "Custom test message", "interval": 0}'
-
-# Generate logs with correlation ID
-curl "http://localhost:8080/log?level=info&token=your-token" \
-  -H "X-Correlation-ID: test-scenario-123"
 ```
 
-**Response Example**:
-```json
-{
-  "level": "warning",
-  "size": "medium",
-  "message": "Database connection pool initialized with 10 connections, ready to serve requests",
-  "interval": 0,
-  "status": "log generation started"
-}
+> 📖 **See [COMMANDS.md](COMMANDS.md) for detailed documentation and examples**
+
+### `/memory` - Memory Utilization Generator
+
+Allocates memory to simulate memory pressure for testing OOM conditions and resource limits.
+
+**Parameters**: `size` (1-8192 MB), `duration` (0-3600s, 0=forever), `format` (json/text)
+
+```bash
+curl "http://localhost:8080/memory?size=200&duration=60&token=your-token"
 ```
 
-**Log Output Behavior**:
-- `info` level: Logs to stdout
-- `warning` and `error` levels: Log to stderr
-- All logs are in structured JSON format
-- Background interval logging runs in separate goroutines
-- Logs include correlation ID if provided via `X-Correlation-ID` header
-
-**Message Sizes**:
-- `short`: Simple operational messages (8-20 words)
-- `medium`: Detailed status messages (15-50 words)  
-- `long`: Comprehensive diagnostic messages (100+ words)
+> 📖 **See [COMMANDS.md](COMMANDS.md) for detailed documentation and examples**
 
 ## Security
 

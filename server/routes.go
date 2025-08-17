@@ -9,6 +9,7 @@ import (
 	"github.com/crlsmrls/dummybox/cmd/delay"
 	"github.com/crlsmrls/dummybox/cmd/info"
 	logcmd "github.com/crlsmrls/dummybox/cmd/log"
+	"github.com/crlsmrls/dummybox/cmd/memory"
 	"github.com/crlsmrls/dummybox/cmd/request"
 	"github.com/crlsmrls/dummybox/config"
 	"github.com/crlsmrls/dummybox/metrics"
@@ -89,6 +90,12 @@ func setupRoutes(router *chi.Mux, cfg *config.Config, reg *prometheus.Registry) 
 		r.Use(TokenAuthMiddleware(cfg))
 		r.Get("/", logcmd.LogHandler)
 		r.Post("/", logcmd.LogHandler)
+	})
+
+	router.Route("/memory", func(r chi.Router) {
+		r.Use(TokenAuthMiddleware(cfg))
+		r.Get("/", memory.MemoryHandler)
+		r.Post("/", memory.MemoryHandler)
 	})
 
 	// Metrics endpoint
