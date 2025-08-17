@@ -89,6 +89,117 @@ It also uses structured JSON logging with configurable log levels.
 - `/healthz`: Always returns 200 OK (liveness probe)
 - `/readyz`: Returns 200 OK when application is ready (readiness probe)
 
+## Command Endpoints
+
+DummyBox provides several command endpoints for testing different scenarios. These endpoints require authentication if `auth-token` is configured.
+
+> 📖 **For detailed documentation with examples and use cases, see [COMMANDS.md](COMMANDS.md)**
+
+### `/delay` - Response Delay Simulation
+
+The delay endpoint allows you to introduce configurable delays in responses, useful for testing timeout handling, latency scenarios, and load balancing behavior.
+
+**Purpose**: Simulate network latency, slow backends, or timeout scenarios
+
+**HTTP Methods**: `GET`, `POST`
+
+**Authentication**: Required if `auth-token` is configured
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `duration` | integer | No | `0` | Delay duration in seconds (0-300) |
+| `code` | integer | No | `200` | HTTP status code to return (100-599) |
+| `format` | string | No | `json` | Response format: `json` or `text` |
+
+**Usage Examples**:
+
+```bash
+# GET request with 2-second delay and 201 status code
+curl "http://localhost:8080/delay?duration=2&code=201&token=your-token"
+
+# POST request with JSON body
+curl -X POST "http://localhost:8080/delay" \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: your-token" \
+  -d '{"duration": 5, "code": 500}'
+
+# Text format response
+curl "http://localhost:8080/delay?duration=1&format=text&token=your-token"
+```
+
+**Response Example**:
+```json
+{
+  "duration": 2,
+  "code": 201,
+  "message": "Delayed for 2 seconds with status code 201"
+}
+```
+
+### `/log` - Log Generation
+
+The log endpoint generates log messages with configurable levels and content, useful for testing log aggregation systems, monitoring alerts, and structured logging pipelines.
+
+**Purpose**: Generate test logs for validating logging systems, alerts, and log processing pipelines
+
+**HTTP Methods**: `GET`, `POST`
+
+**Authentication**: Required if `auth-token` is configured
+
+**Parameters**:
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `level` | string | No | `info` | Log level: `info`, `warning`, or `error` |
+| `size` | string | No | `short` | Message size: `short`, `medium`, or `long` |
+| `message` | string | No | (generated) | Custom message to log (URL-encoded for GET) |
+| `interval` | integer | No | `0` | Seconds between logs (0 = log once, max 3600) |
+
+**Usage Examples**:
+
+```bash
+# Generate a single info log with short message
+curl "http://localhost:8080/log?level=info&size=short&token=your-token"
+
+# Generate error logs every 30 seconds
+curl "http://localhost:8080/log?level=error&interval=30&token=your-token"
+
+# POST request with custom message
+curl -X POST "http://localhost:8080/log" \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: your-token" \
+  -d '{"level": "warning", "size": "medium", "message": "Custom test message", "interval": 0}'
+
+# Generate logs with correlation ID
+curl "http://localhost:8080/log?level=info&token=your-token" \
+  -H "X-Correlation-ID: test-scenario-123"
+```
+
+**Response Example**:
+```json
+{
+  "level": "warning",
+  "size": "medium",
+  "message": "Database connection pool initialized with 10 connections, ready to serve requests",
+  "interval": 0,
+  "status": "log generation started"
+}
+```
+
+**Log Output Behavior**:
+- `info` level: Logs to stdout
+- `warning` and `error` levels: Log to stderr
+- All logs are in structured JSON format
+- Background interval logging runs in separate goroutines
+- Logs include correlation ID if provided via `X-Correlation-ID` header
+
+**Message Sizes**:
+- `short`: Simple operational messages (8-20 words)
+- `medium`: Detailed status messages (15-50 words)  
+- `long`: Comprehensive diagnostic messages (100+ words)
+
 ## Security
 
 DummyBox is meant to be used in controlled testing environments. However, it includes basic security features to prevent unauthorized access to certain endpoints.
@@ -100,5 +211,6 @@ When `auth-token` is configured, protected endpoints require authentication via 
 1. **Query parameter**: `?token=your-secret-token`
 2. **HTTP header**: `X-Auth-Token: your-secret-token`
 
+Protected endpoints include all command endpoints (`/delay`, `/log`, etc.).
 
 **DummyBox** - Making container testing simple and reliable! 🚀
