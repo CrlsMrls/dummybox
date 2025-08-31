@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/crlsmrls/dummybox/cmd/cpu"
 	"github.com/crlsmrls/dummybox/cmd/delay"
 	"github.com/crlsmrls/dummybox/cmd/info"
 	logcmd "github.com/crlsmrls/dummybox/cmd/log"
@@ -96,6 +97,12 @@ func setupRoutes(router *chi.Mux, cfg *config.Config, reg *prometheus.Registry) 
 		r.Use(TokenAuthMiddleware(cfg))
 		r.Get("/", memory.MemoryHandler)
 		r.Post("/", memory.MemoryHandler)
+	})
+
+	router.Route("/cpu", func(r chi.Router) {
+		r.Use(TokenAuthMiddleware(cfg))
+		r.Get("/", cpu.CPUHandler)
+		r.Post("/", cpu.CPUHandler)
 	})
 
 	// Metrics endpoint

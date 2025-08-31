@@ -95,7 +95,7 @@ It also uses structured JSON logging with configurable log levels.
 
 ## Command Endpoints
 
-DummyBox provides several command endpoints for testing different scenarios. These endpoints require authentication if `auth-token` is configured.
+DummyBox provides several command endpoints for testing different scenarios. These endpoints require authentication if `auth-token` is configured. In those cases, provide the token via the `token` query parameter or `X-Auth-Token` HTTP header.
 
 > 📖 **For detailed documentation with examples and use cases, see [COMMANDS.md](COMMANDS.md)**
 
@@ -106,10 +106,9 @@ Introduces configurable delays in responses for testing timeout handling and lat
 **Parameters**: `duration` (0-300s), `code` (HTTP status), `format` (json/text)
 
 ```bash
-curl "http://localhost:8080/delay?duration=2&code=201&token=your-token"
+curl "http://localhost:8080/delay?duration=2&code=201"
 ```
 
-> 📖 **See [COMMANDS.md](COMMANDS.md) for detailed documentation and examples**
 
 ### `/log` - Log Generation
 
@@ -118,10 +117,20 @@ Generates structured log messages for testing log aggregation systems and monito
 **Parameters**: `level` (info/warning/error), `size` (short/medium/long), `message` (custom), `interval` (0-3600s), `duration` (0-86400s), `correlation` (true/false)
 
 ```bash
-curl "http://localhost:8080/log?level=error&interval=30&token=your-token"
+curl "http://localhost:8080/log?level=error&interval=30"
 ```
 
-> 📖 **See [COMMANDS.md](COMMANDS.md) for detailed documentation and examples**
+
+### `/cpu` - CPU Load Generation
+
+Simulates CPU load with configurable intensity levels for testing CPU monitoring and autoscaling scenarios.
+
+**Parameters**: `intensity` (light/medium/heavy/extreme), `duration` (0-3600s, 0=forever), `format` (json/text)
+
+```bash
+curl "http://localhost:8080/cpu?intensity=heavy&duration=120"
+```
+
 
 ### `/memory` - Memory Utilization Generator
 
@@ -130,10 +139,9 @@ Allocates memory to simulate memory pressure for testing OOM conditions and reso
 **Parameters**: `size` (1-8192 MB), `duration` (0-3600s, 0=forever), `format` (json/text)
 
 ```bash
-curl "http://localhost:8080/memory?size=200&duration=60&token=your-token"
+curl "http://localhost:8080/memory?size=200&duration=60"
 ```
 
-> 📖 **See [COMMANDS.md](COMMANDS.md) for detailed documentation and examples**
 
 ## Security
 

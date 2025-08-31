@@ -12,6 +12,7 @@ GO_VERSION := $(shell go version | cut -d ' ' -f 3)
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
+
 # Development
 dev: ## Run the server in development mode
 	go run .
@@ -107,3 +108,25 @@ tag: ## Create and push git tag for current version
 # Complete release workflow
 release: test build publish tag ## Complete release: test, build, publish, and tag
 	@echo "Release $(VERSION) completed successfully!"
+
+# Port management utilities
+check-port: ## Check if port is in use (usage: make check-port PORT=8080)
+	@PORT=$${PORT:-8080}; \
+	echo "Checking port $$PORT..."; \
+	if lsof -i :$$PORT > /dev/null 2>&1; then \
+		echo "❌ Port $$PORT is in use:"; \
+		lsof -i :$$PORT; \
+		echo "Run 'make kill-port PORT=$$PORT' to free it"; \
+	else \
+		echo "✅ Port $$PORT is available"; \
+	fi
+
+kill-port: ## Kill any process using port (usage: make kill-port PORT=8080)
+	@PORT=$${PORT:-8080}; \
+	echo "Killing processes on port $$PORT..."; \
+	if lsof -i :$$PORT > /dev/null 2>&1; then \
+		lsof -ti :$$PORT | xargs kill; \
+		echo "✅ Port $$PORT freed"; \
+	else \
+		echo "ℹ️  Port $$PORT was already free"; \
+	fi

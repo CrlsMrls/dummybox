@@ -184,6 +184,154 @@ When correlation ID is provided:
 
 ---
 
+## `/cpu` - CPU Load Generation
+
+### Purpose
+The CPU endpoint generates configurable CPU load with intensity-based control, making it ideal for testing:
+- CPU monitoring and alerting systems
+- Horizontal Pod Autoscaler (HPA) scaling based on CPU utilization
+- Resource limit enforcement and throttling
+- CPU-based container orchestration decisions
+- Load balancer behavior with high CPU backends
+
+### HTTP Methods
+- `GET`: Parameters passed as query parameters
+- `POST`: Parameters passed in JSON request body
+
+### Parameters
+
+| Parameter | Type | Required | Default | Valid Values | Description |
+|-----------|------|----------|---------|--------------|-------------|
+| `intensity` | string | No | `medium` | `light`, `medium`, `heavy`, `extreme` | CPU load intensity level |
+| `duration` | integer | No | `60` | 0-3600 | Duration in seconds to generate CPU load (0 = forever) |
+| `format` | string | No | `json` | `json`, `text` | Response format type |
+
+### Intensity Levels
+
+Each intensity level uses a different work pattern to generate varying CPU loads:
+
+| Intensity | Work Size | Work Duration | Sleep Duration | Description |
+|-----------|-----------|---------------|----------------|-------------|
+| `light` | 5000 | 100ms | 400ms | Light CPU stress - minimal system impact |
+| `medium` | 15000 | 250ms | 250ms | Medium CPU stress - moderate system load |
+| `heavy` | 30000 | 400ms | 100ms | Heavy CPU stress - high system load |
+| `extreme` | 50000 | 500ms | 0ms | Extreme CPU stress - maximum system load |
+
+### CPU Load Behavior
+
+#### Worker Management
+- Spawns one worker goroutine per CPU core (`runtime.NumCPU()`)
+- Each worker performs CPU-intensive prime number calculations
+- Workers run independently with configurable work/sleep cycles
+- Automatic cleanup when duration expires or context is cancelled
+
+### Request Examples
+
+#### GET Request - Basic CPU Load
+```bash
+# Generate medium CPU load for 60 seconds (defaults)
+curl "http://localhost:8080/cpu?token=your-token"
+
+# Generate heavy CPU load for 2 minutes
+curl "http://localhost:8080/cpu?intensity=heavy&duration=120&token=your-token"
+
+# Generate light CPU load indefinitely
+curl "http://localhost:8080/cpu?intensity=light&duration=0&token=your-token"
+
+# Get text format response
+curl "http://localhost:8080/cpu?intensity=extreme&duration=30&format=text&token=your-token"
+```
+
+#### POST Request with JSON Body
+```bash
+# Generate CPU load using JSON payload
+curl -X POST "http://localhost:8080/cpu" \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: your-token" \
+  -d '{
+    "intensity": "heavy",
+    "duration": 180
+  }'
+```
+
+#### Advanced Usage with Correlation ID
+```bash
+curl -X POST "http://localhost:8080/cpu" \
+  -H "Content-Type: application/json" \
+  -H "X-Correlation-ID: cpu-stress-test-001" \
+  -H "X-Auth-Token: your-token" \
+  -d '{
+    "intensity": "extreme",
+    "duration": 300
+  }'
+```
+
+### Response Examples
+
+#### JSON Response (Default)
+```json
+{
+  "intensity": "heavy",
+  "duration": 120,
+  "job_key": "cpu-job-1-20240919-162548",
+  "workers": 8,
+  "description": "Heavy CPU stress - high system load",
+  "config": {
+    "work_size": 30000,
+    "work_duration": "400ms",
+    "sleep_duration": "100ms",
+    "description": "Heavy CPU stress - high system load"
+  },
+  "message": "Generating heavy CPU load for 120 seconds"
+}
+```
+
+#### Text Response (`format=text`)
+```
+Generating heavy CPU load for 120 seconds
+Job key: cpu-job-1-20240919-162548
+Workers: 8
+Description: Heavy CPU stress - high system load
+```
+
+### CPU Testing Use Cases
+
+#### HPA Scaling Tests
+```bash
+# Trigger HPA scale-up with sustained CPU load
+curl "http://localhost:8080/cpu?intensity=heavy&duration=300&token=your-token"
+
+# Test rapid scaling with extreme load
+curl "http://localhost:8080/cpu?intensity=extreme&duration=180&token=your-token"
+```
+
+#### CPU Resource Limit Testing
+```bash
+# Test CPU throttling with extreme load
+curl "http://localhost:8080/cpu?intensity=extreme&duration=600&token=your-token"
+```
+
+#### Multiple Concurrent CPU Jobs
+```bash
+# Create multiple concurrent CPU stress jobs
+for i in {1..3}; do
+  curl "http://localhost:8080/cpu?intensity=medium&duration=240&token=your-token" &
+done
+wait
+```
+
+#### Progressive CPU Load Testing
+```bash
+# Gradually increase CPU intensity
+for intensity in light medium heavy extreme; do
+  echo "Testing $intensity intensity..."
+  curl "http://localhost:8080/cpu?intensity=$intensity&duration=60&token=your-token"
+  sleep 30
+done
+```
+
+---
+
 ## `/memory` - Memory Utilization Generator
 
 The `/memory` endpoint allows you to simulate memory utilization by allocating specified amounts of memory for a given duration. This is useful for:
