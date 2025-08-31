@@ -1,7 +1,6 @@
 package memory
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -26,8 +25,7 @@ var (
 
 // MemoryHandler generates memory utilization based on specified parameters.
 func MemoryHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
-	defer cancel()
+	ctx := r.Context() // Only use request context for logging in this function
 	
 	params := MemoryParams{
 		Size:     100, // Default 100MB
@@ -85,14 +83,9 @@ func MemoryHandler(w http.ResponseWriter, r *http.Request) {
 	// If duration is 0, keep memory allocated indefinitely
 	if params.Duration > 0 {
 		go func() {
-			select {
-			case <-time.After(time.Duration(params.Duration) * time.Second):
-				deallocateMemory(allocKey)
-				log.Ctx(ctx).Info().Str("alloc_key", allocKey).Msg("memory deallocated after timeout")
-			case <-ctx.Done():
-				deallocateMemory(allocKey)
-				log.Ctx(ctx).Info().Str("alloc_key", allocKey).Msg("memory deallocated due to context cancellation")
-			}
+			time.Sleep(time.Duration(params.Duration) * time.Second)
+			deallocateMemory(allocKey)
+			log.Info().Str("alloc_key", allocKey).Msg("memory deallocated after timeout")
 		}()
 	}
 

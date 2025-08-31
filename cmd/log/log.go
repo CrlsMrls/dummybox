@@ -102,12 +102,21 @@ func LogHandler(w http.ResponseWriter, r *http.Request) {
 		Str("correlation", params.Correlation).
 		Msg("log generation request received")
 
-	// Determine correlation ID context
-	var ctx context.Context
+	// Create contexts for different purposes
+	var immediateCtx context.Context   // For immediate log entry (uses request context)
+	var backgroundCtx context.Context  // For background logging (independent context)
+	
 	if params.Correlation == "false" {
-		ctx = context.Background()
+		immediateCtx = context.Background()
+		backgroundCtx = context.Background()
 	} else {
-		ctx = r.Context()
+		immediateCtx = r.Context()
+		// Create background context with correlation ID but independent of HTTP request
+		backgroundCtx = context.Background()
+		// Copy the logger with correlation ID from request context
+		if requestLogger := log.Ctx(r.Context()); requestLogger != nil {
+			backgroundCtx = requestLogger.WithContext(backgroundCtx)
+		}
 	}
 
 	// Generate logs based on interval and duration
@@ -115,9 +124,9 @@ func LogHandler(w http.ResponseWriter, r *http.Request) {
 		// Log once immediately
 		level := getActualLevel(params.Level)
 		message := getActualMessage(params.Message, params.Size)
-		generateLogEntry(ctx, level, message)
+		generateLogEntry(immediateCtx, level, message)
 	} else {
-		// Start background logging
+		// Start background logging using independent context
 		go func() {
 			var ticker *time.Ticker
 			var durationTimer *time.Timer
@@ -135,7 +144,7 @@ func LogHandler(w http.ResponseWriter, r *http.Request) {
 			// Log immediately first
 			level := getActualLevel(params.Level)
 			message := getActualMessage(params.Message, params.Size)
-			generateLogEntry(ctx, level, message)
+			generateLogEntry(backgroundCtx, level, message)
 
 			// If no interval, we're done
 			if params.Interval == 0 {
@@ -148,7 +157,7 @@ func LogHandler(w http.ResponseWriter, r *http.Request) {
 				case <-ticker.C:
 					level := getActualLevel(params.Level)
 					message := getActualMessage(params.Message, params.Size)
-					generateLogEntry(ctx, level, message)
+					generateLogEntry(backgroundCtx, level, message)
 				case <-durationTimer.C:
 					// Duration expired, stop logging
 					if params.Duration > 0 {
