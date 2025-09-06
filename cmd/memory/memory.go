@@ -104,10 +104,10 @@ func MemoryHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"size_mb":          params.Size,
-			"duration":         params.Duration,
+			"size_mb":          fmt.Sprintf("%d", params.Size),
+			"duration":         fmt.Sprintf("%d", params.Duration),
 			"allocation_key":   allocKey,
-			"current_heap_mb":  float64(memStats.HeapAlloc) / 1024 / 1024,
+			"current_heap_mb":  fmt.Sprintf("%.2f", float64(memStats.HeapAlloc)/1024/1024),
 			"message":          fmt.Sprintf("Allocated %dMB of memory for %d seconds", params.Size, params.Duration),
 		})
 	}

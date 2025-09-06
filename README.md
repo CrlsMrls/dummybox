@@ -103,57 +103,41 @@ DummyBox provides several command endpoints for testing different scenarios. The
 
 Introduces configurable delays in responses for testing timeout handling and latency scenarios.
 
-**Parameters**: `duration` (0-300s), `code` (HTTP status), `format` (json/text)
-
-```bash
-curl "http://localhost:8080/delay?duration=2&code=201"
-```
-
+**Parameters**: 
+- `duration` (0-300s)
+- `code` (HTTP status)
+- `format` (json/text)
 
 ### `/log` - Log Generation
 
 Generates structured log messages for testing log aggregation systems and monitoring alerts.
 
-**Parameters**: `level` (info/warning/error), `size` (short/medium/long), `message` (custom), `interval` (0-3600s), `duration` (0-86400s), `correlation` (true/false)
-
-```bash
-curl "http://localhost:8080/log?level=error&interval=30"
-```
+**Parameters**: 
+- `level` (info/warning/error)
+- `size` (short/medium/long)
+- `message` (custom)
+- `interval` (0-3600s)
+- `duration` (0-86400s)
+- `correlation` (true/false)
 
 
 ### `/cpu` - CPU Load Generation
 
 Simulates CPU load with configurable intensity levels for testing CPU monitoring and autoscaling scenarios.
 
-**Parameters**: `intensity` (light/medium/heavy/extreme), `duration` (0-3600s, 0=forever), `format` (json/text)
-
-```bash
-curl "http://localhost:8080/cpu?intensity=heavy&duration=120"
-```
-
+**Parameters**: 
+- `intensity` (light/medium/heavy/extreme)
+- `duration` (0-3600s, 0=forever)
+- `format` (json/text)
 
 ### `/memory` - Memory Utilization Generator
 
 Allocates memory to simulate memory pressure for testing OOM conditions and resource limits.
 
-**Parameters**: `size` (1-8192 MB), `duration` (0-3600s, 0=forever), `format` (json/text)
+**Parameters**:
+- `size` (1-8192 MB)
+- `duration` (0-3600s, 0=forever)
+- `format` (json/text)
 
-```bash
-curl "http://localhost:8080/memory?size=200&duration=60"
-```
 
-
-## Security
-
-DummyBox is meant to be used in controlled testing environments. However, it includes basic security features to prevent unauthorized access to certain endpoints.
-
-The authentication mechanism is a simple token-based system. The token can be set via the `DUMMYBOX_AUTH_TOKEN` environment variable or `--auth-token` command-line flag.
-
-When `auth-token` is configured, protected endpoints require authentication via token. You can provide the token in two ways:
-
-1. **Query parameter**: `?token=your-secret-token`
-2. **HTTP header**: `X-Auth-Token: your-secret-token`
-
-Protected endpoints include all command endpoints (`/delay`, `/log`, etc.).
-
-**DummyBox** - Making container testing simple and reliable! 🚀
+**DummyBox** - Making container testing simple! 🚀

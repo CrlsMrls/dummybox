@@ -75,8 +75,8 @@ func DelayHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(params.Code)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"duration": params.Duration,
-			"code":     params.Code,
+			"duration": fmt.Sprintf("%d", params.Duration),
+			"code":     fmt.Sprintf("%d", params.Code),
 			"message":  fmt.Sprintf("Delayed for %d seconds with status code %d", params.Duration, params.Code),
 		})
 	}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"runtime"
@@ -41,8 +42,8 @@ func TestMemoryHandler_GET_DefaultParameters(t *testing.T) {
 	}
 
 	// Check that current_heap_mb is present and reasonable
-	if heapMB, ok := response["current_heap_mb"].(float64); !ok || heapMB < 0 {
-		t.Errorf("expected positive current_heap_mb, got %v", response["current_heap_mb"])
+	if heapStr, ok := response["current_heap_mb"].(string); !ok || heapStr == "" {
+		t.Errorf("expected current_heap_mb as string, got %v", response["current_heap_mb"])
 	}
 }
 
@@ -86,11 +87,13 @@ func TestMemoryHandler_GET_WithParameters(t *testing.T) {
 				t.Fatalf("failed to unmarshal response: %v", err)
 			}
 
-			if int(response["size_mb"].(float64)) != tc.wantSize {
-				t.Errorf("expected size_mb %d, got %v", tc.wantSize, response["size_mb"])
+			expectedSizeStr := fmt.Sprintf("%d", tc.wantSize)
+			if response["size_mb"] != expectedSizeStr {
+				t.Errorf("expected size_mb '%s', got %v", expectedSizeStr, response["size_mb"])
 			}
-			if int(response["duration"].(float64)) != tc.wantDur {
-				t.Errorf("expected duration %d, got %v", tc.wantDur, response["duration"])
+			expectedDurStr := fmt.Sprintf("%d", tc.wantDur)
+			if response["duration"] != expectedDurStr {
+				t.Errorf("expected duration '%s', got %v", expectedDurStr, response["duration"])
 			}
 		})
 	}
@@ -143,11 +146,11 @@ func TestMemoryHandler_POST_ValidJSON(t *testing.T) {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 
-	if int(response["size_mb"].(float64)) != 75 {
-		t.Errorf("expected size_mb 75, got %v", response["size_mb"])
+	if response["size_mb"] != "75" {
+		t.Errorf("expected size_mb '75', got %v", response["size_mb"])
 	}
-	if int(response["duration"].(float64)) != 45 {
-		t.Errorf("expected duration 45, got %v", response["duration"])
+	if response["duration"] != "45" {
+		t.Errorf("expected duration '45', got %v", response["duration"])
 	}
 }
 
@@ -224,11 +227,13 @@ func TestMemoryHandler_ParameterValidation(t *testing.T) {
 				t.Fatalf("failed to unmarshal response: %v", err)
 			}
 
-			if int(response["size_mb"].(float64)) != tc.expectedSize {
-				t.Errorf("expected size_mb %d, got %v", tc.expectedSize, response["size_mb"])
+			expectedSizeStr := fmt.Sprintf("%d", tc.expectedSize)
+			if response["size_mb"] != expectedSizeStr {
+				t.Errorf("expected size_mb '%s', got %v", expectedSizeStr, response["size_mb"])
 			}
-			if int(response["duration"].(float64)) != tc.expectedDur {
-				t.Errorf("expected duration %d, got %v", tc.expectedDur, response["duration"])
+			expectedDurStr := fmt.Sprintf("%d", tc.expectedDur)
+			if response["duration"] != expectedDurStr {
+				t.Errorf("expected duration '%s', got %v", expectedDurStr, response["duration"])
 			}
 		})
 	}

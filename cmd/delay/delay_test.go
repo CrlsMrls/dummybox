@@ -3,6 +3,7 @@ package delay
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -48,11 +49,11 @@ func TestDelayHandler_GET_DefaultParameters(t *testing.T) {
 	}
 
 	// Check response values
-	if response["duration"] != float64(0) {
-		t.Errorf("Expected duration 0, got %v", response["duration"])
+	if response["duration"] != "0" {
+		t.Errorf("Expected duration \"0\", got %v", response["duration"])
 	}
-	if response["code"] != float64(200) {
-		t.Errorf("Expected code 200, got %v", response["code"])
+	if response["code"] != "200" {
+		t.Errorf("Expected code \"200\", got %v", response["code"])
 	}
 }
 
@@ -81,11 +82,11 @@ func TestDelayHandler_GET_WithParameters(t *testing.T) {
 	}
 
 	// Check response values
-	if response["duration"] != float64(1) {
-		t.Errorf("Expected duration 1, got %v", response["duration"])
+	if response["duration"] != "1" {
+		t.Errorf("Expected duration \"1\", got %v", response["duration"])
 	}
-	if response["code"] != float64(201) {
-		t.Errorf("Expected code 201, got %v", response["code"])
+	if response["code"] != "201" {
+		t.Errorf("Expected code \"201\", got %v", response["code"])
 	}
 }
 
@@ -145,11 +146,11 @@ func TestDelayHandler_POST_ValidJSON(t *testing.T) {
 	}
 
 	// Check response values
-	if response["duration"] != float64(1) {
-		t.Errorf("Expected duration 1, got %v", response["duration"])
+	if response["duration"] != "1" {
+		t.Errorf("Expected duration \"1\", got %v", response["duration"])
 	}
-	if response["code"] != float64(203) {
-		t.Errorf("Expected code 203, got %v", response["code"])
+	if response["code"] != "203" {
+		t.Errorf("Expected code \"203\", got %v", response["code"])
 	}
 }
 
@@ -271,11 +272,13 @@ func TestDelayHandler_ParameterValidation(t *testing.T) {
 			}
 
 			// Check response values
-			if response["duration"] != float64(tt.expectedDuration) {
-				t.Errorf("Expected duration %d, got %v", tt.expectedDuration, response["duration"])
+			expectedDurationStr := fmt.Sprintf("%d", tt.expectedDuration)
+			expectedCodeStr := fmt.Sprintf("%d", tt.expectedCode)
+			if response["duration"] != expectedDurationStr {
+				t.Errorf("Expected duration \"%s\", got %v", expectedDurationStr, response["duration"])
 			}
-			if response["code"] != float64(tt.expectedCode) {
-				t.Errorf("Expected code %d, got %v", tt.expectedCode, response["code"])
+			if response["code"] != expectedCodeStr {
+				t.Errorf("Expected code \"%s\", got %v", expectedCodeStr, response["code"])
 			}
 		})
 	}
@@ -299,10 +302,10 @@ func TestDelayHandler_UnsupportedMethod(t *testing.T) {
 	}
 
 	// Should use default values
-	if response["duration"] != float64(0) {
-		t.Errorf("Expected duration 0, got %v", response["duration"])
+	if response["duration"] != "0" {
+		t.Errorf("Expected duration \"0\", got %v", response["duration"])
 	}
-	if response["code"] != float64(200) {
-		t.Errorf("Expected code 200, got %v", response["code"])
+	if response["code"] != "200" {
+		t.Errorf("Expected code \"200\", got %v", response["code"])
 	}
 }

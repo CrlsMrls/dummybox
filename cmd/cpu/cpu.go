@@ -198,11 +198,16 @@ func CPUHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"intensity":   params.Intensity,
-			"duration":    params.Duration,
+			"duration":    fmt.Sprintf("%d", params.Duration),
 			"job_key":     jobKey,
-			"workers":     runtime.NumCPU(),
+			"workers":     fmt.Sprintf("%d", runtime.NumCPU()),
 			"description": config.Description,
-			"config":      config,
+			"config": map[string]interface{}{
+				"work_size":      fmt.Sprintf("%d", config.WorkSize),
+				"work_duration":  config.WorkDuration.String(),
+				"sleep_duration": config.SleepDuration.String(),
+				"description":    config.Description,
+			},
 			"message":     fmt.Sprintf("Generating %s CPU load for %d seconds", params.Intensity, params.Duration),
 		})
 	}

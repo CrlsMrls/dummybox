@@ -27,8 +27,8 @@ func TestMemoryEndpoint_BasicHTTP(t *testing.T) {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 
-	if int(response["size_mb"].(float64)) != 20 {
-		t.Errorf("expected size_mb 20, got %v", response["size_mb"])
+	if response["size_mb"] != "20" {
+		t.Errorf("expected size_mb '20', got %v", response["size_mb"])
 	}
 }
 
@@ -54,11 +54,11 @@ func TestMemoryEndpoint_POST_JSON(t *testing.T) {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 
-	if int(response["size_mb"].(float64)) != 40 {
-		t.Errorf("expected size_mb 40, got %v", response["size_mb"])
+	if response["size_mb"] != "40" {
+		t.Errorf("expected size_mb '40', got %v", response["size_mb"])
 	}
-	if int(response["duration"].(float64)) != 15 {
-		t.Errorf("expected duration 15, got %v", response["duration"])
+	if response["duration"] != "15" {
+		t.Errorf("expected duration '15', got %v", response["duration"])
 	}
 }
 

@@ -122,8 +122,8 @@ func TestCPUHandler_GET_DefaultParameters(t *testing.T) {
 		t.Errorf("expected default intensity 'medium', got %v", response["intensity"])
 	}
 
-	if int(response["duration"].(float64)) != 60 {
-		t.Errorf("expected default duration 60, got %v", response["duration"])
+	if response["duration"] != "60" {
+		t.Errorf("expected default duration '60', got %v", response["duration"])
 	}
 
 	// Verify job key is present
@@ -162,8 +162,8 @@ func TestCPUHandler_GET_WithParameters(t *testing.T) {
 		t.Errorf("expected intensity 'heavy', got %v", response["intensity"])
 	}
 
-	if int(response["duration"].(float64)) != 30 {
-		t.Errorf("expected duration 30, got %v", response["duration"])
+	if response["duration"] != "30" {
+		t.Errorf("expected duration '30', got %v", response["duration"])
 	}
 
 	// Wait briefly and cleanup
@@ -195,8 +195,8 @@ func TestCPUHandler_POST_JSON(t *testing.T) {
 		t.Errorf("expected intensity 'light', got %v", response["intensity"])
 	}
 
-	if int(response["duration"].(float64)) != 15 {
-		t.Errorf("expected duration 15, got %v", response["duration"])
+	if response["duration"] != "15" {
+		t.Errorf("expected duration '15', got %v", response["duration"])
 	}
 
 	// Wait briefly and cleanup

@@ -2,22 +2,28 @@
 
 This document provides detailed information about DummyBox's command endpoints, which are designed for testing various application behaviors and scenarios.
 
-## Overview
-
 Command endpoints simulate different application behaviors to help test monitoring systems, network conditions, and application resilience.
+
+
+All endpoints support the following features:
+
+- `GET`: Parameters passed as query parameters
+- `POST`: Parameters passed in JSON request body
 
 ## Authentication
 
-If the server is configured with an `auth-token`, all command endpoints require authentication. The token can be provided in two ways:
+The authentication mechanism is a simple token-based system. The token can be set via the `DUMMYBOX_AUTH_TOKEN` environment variable or `--auth-token` command-line flag.
 
-1. **Query Parameter**: `?token=your-secret-token`
-2. **HTTP Header**: `X-Auth-Token: your-secret-token`
+When `auth-token` is configured, protected endpoints require authentication via token. You can provide the token in two ways:
 
-If no authentication token is configured on the server, these endpoints are publicly accessible.
+1. **Query parameter**: `?token=your-secret-token`
+2. **HTTP header**: `X-Auth-Token: your-secret-token`
+
+**Note:** If no authentication token is configured on the server, these endpoints are publicly accessible.
 
 ## Correlation ID Support
 
-All endpoints support the `X-Correlation-ID` header for request tracing. If provided, the correlation ID will be included in all log entries related to the request and returned in the response headers.
+All endpoints support the `X-Correlation-ID` HTTP header for request tracing. If provided, the correlation ID will be included in all log entries related to the request and returned in the response headers.
 
 ---
 
@@ -31,9 +37,6 @@ The delay endpoint introduces configurable delays in HTTP responses, making it i
 - Performance monitoring and alerting
 - Network latency simulation
 
-### HTTP Methods
-- `GET`: Parameters passed as query parameters
-- `POST`: Parameters passed in JSON request body
 
 ### Parameters
 
@@ -49,13 +52,10 @@ The delay endpoint introduces configurable delays in HTTP responses, making it i
 #### GET Request with Query Parameters
 ```bash
 # Basic delay of 2 seconds
-curl "http://localhost:8080/delay?duration=2&token=your-token"
+curl "http://localhost:8080/delay?duration=2"
 
 # Custom status code with delay
-curl "http://localhost:8080/delay?duration=5&code=500&token=your-token"
-
-# Text format response
-curl "http://localhost:8080/delay?duration=1&code=201&format=text&token=your-token"
+curl "http://localhost:8080/delay?duration=5&code=500"
 ```
 
 #### POST Request with JSON Body and correlation ID
@@ -76,8 +76,8 @@ curl -X POST "http://localhost:8080/delay" \
 #### JSON Response (default)
 ```json
 {
-  "duration": 2,
-  "code": 200,
+  "duration": "2",
+  "code": "200",
   "message": "Delayed for 2 seconds with status code 200"
 }
 ```
@@ -99,9 +99,6 @@ The log endpoint generates structured log messages for testing:
 - Structured logging pipelines
 - Application performance monitoring (APM)
 
-### HTTP Methods
-- `GET`: Parameters passed as query parameters
-- `POST`: Parameters passed in JSON request body
 
 ### Parameters
 
@@ -126,22 +123,22 @@ Interval Logging
 #### GET Request - Single Log Entry
 ```bash
 # Generate one info log with short message
-curl "http://localhost:8080/log?level=info&size=short&token=your-token"
+curl "http://localhost:8080/log?level=info&size=short"
 
 # Generate error log with long message
-curl "http://localhost:8080/log?level=error&size=long&token=your-token"
+curl "http://localhost:8080/log?level=error&size=long"
 
 # Custom message (URL-encoded)
-curl "http://localhost:8080/log?level=warning&message=Custom%20test%20message&token=your-token"
+curl "http://localhost:8080/log?level=warning&message=Custom%20test%20message"
 ```
 
 #### GET Request - Interval Logging
 ```bash
 # Generate error logs every 30 seconds
-curl "http://localhost:8080/log?level=error&size=medium&interval=30&token=your-token"
+curl "http://localhost:8080/log?level=error&size=medium&interval=30"
 
 # Generate info logs every 5 seconds with custom message
-curl "http://localhost:8080/log?level=info&message=Heartbeat&interval=5&token=your-token"
+curl "http://localhost:8080/log?level=info&message=Heartbeat&interval=5"
 ```
 
 #### POST Request with JSON Body and Correlation ID
@@ -167,20 +164,11 @@ Successful Response
   "level": "error",
   "size": "long",
   "message": "System performance analysis completed: CPU usage averaged 35%...",
-  "interval": 30,
+  "interval": "30",
   "status": "log generation started"
 }
 ```
 
-When correlation ID is provided:
-```json
-{
-  "level": "warning",
-  "correlation_id": "log-test-scenario-001",
-  "time": "2025-09-19T15:24:39+02:00", 
-  "message": "Database connection pool initialized with 10 connections, ready to serve requests"
-}
-```
 
 ---
 
@@ -194,9 +182,6 @@ The CPU endpoint generates configurable CPU load with intensity-based control, m
 - CPU-based container orchestration decisions
 - Load balancer behavior with high CPU backends
 
-### HTTP Methods
-- `GET`: Parameters passed as query parameters
-- `POST`: Parameters passed in JSON request body
 
 ### Parameters
 
@@ -206,7 +191,6 @@ The CPU endpoint generates configurable CPU load with intensity-based control, m
 | `duration` | integer | No | `60` | 0-3600 | Duration in seconds to generate CPU load (0 = forever) |
 | `format` | string | No | `json` | `json`, `text` | Response format type |
 
-### Intensity Levels
 
 Each intensity level uses a different work pattern to generate varying CPU loads:
 
@@ -219,7 +203,6 @@ Each intensity level uses a different work pattern to generate varying CPU loads
 
 ### CPU Load Behavior
 
-#### Worker Management
 - Spawns one worker goroutine per CPU core (`runtime.NumCPU()`)
 - Each worker performs CPU-intensive prime number calculations
 - Workers run independently with configurable work/sleep cycles
@@ -230,16 +213,13 @@ Each intensity level uses a different work pattern to generate varying CPU loads
 #### GET Request - Basic CPU Load
 ```bash
 # Generate medium CPU load for 60 seconds (defaults)
-curl "http://localhost:8080/cpu?token=your-token"
+curl "http://localhost:8080/cpu"
 
 # Generate heavy CPU load for 2 minutes
-curl "http://localhost:8080/cpu?intensity=heavy&duration=120&token=your-token"
+curl "http://localhost:8080/cpu?intensity=heavy&duration=120"
 
 # Generate light CPU load indefinitely
-curl "http://localhost:8080/cpu?intensity=light&duration=0&token=your-token"
-
-# Get text format response
-curl "http://localhost:8080/cpu?intensity=extreme&duration=30&format=text&token=your-token"
+curl "http://localhost:8080/cpu?intensity=light&duration=0"
 ```
 
 #### POST Request with JSON Body
@@ -272,12 +252,12 @@ curl -X POST "http://localhost:8080/cpu" \
 ```json
 {
   "intensity": "heavy",
-  "duration": 120,
+  "duration": "120",
   "job_key": "cpu-job-1-20240919-162548",
-  "workers": 8,
+  "workers": "8",
   "description": "Heavy CPU stress - high system load",
   "config": {
-    "work_size": 30000,
+    "work_size": "30000",
     "work_duration": "400ms",
     "sleep_duration": "100ms",
     "description": "Heavy CPU stress - high system load"
@@ -294,42 +274,6 @@ Workers: 8
 Description: Heavy CPU stress - high system load
 ```
 
-### CPU Testing Use Cases
-
-#### HPA Scaling Tests
-```bash
-# Trigger HPA scale-up with sustained CPU load
-curl "http://localhost:8080/cpu?intensity=heavy&duration=300&token=your-token"
-
-# Test rapid scaling with extreme load
-curl "http://localhost:8080/cpu?intensity=extreme&duration=180&token=your-token"
-```
-
-#### CPU Resource Limit Testing
-```bash
-# Test CPU throttling with extreme load
-curl "http://localhost:8080/cpu?intensity=extreme&duration=600&token=your-token"
-```
-
-#### Multiple Concurrent CPU Jobs
-```bash
-# Create multiple concurrent CPU stress jobs
-for i in {1..3}; do
-  curl "http://localhost:8080/cpu?intensity=medium&duration=240&token=your-token" &
-done
-wait
-```
-
-#### Progressive CPU Load Testing
-```bash
-# Gradually increase CPU intensity
-for intensity in light medium heavy extreme; do
-  echo "Testing $intensity intensity..."
-  curl "http://localhost:8080/cpu?intensity=$intensity&duration=60&token=your-token"
-  sleep 30
-done
-```
-
 ---
 
 ## `/memory` - Memory Utilization Generator
@@ -339,10 +283,6 @@ The `/memory` endpoint allows you to simulate memory utilization by allocating s
 - Testing application behavior under memory pressure
 - Triggering memory-based alerts and monitoring
 - Simulating out-of-memory conditions
-
-### HTTP Methods
-- `GET`: Parameters passed as query parameters
-- `POST`: Parameters passed in JSON request body
 
 ### Parameters
 
@@ -360,11 +300,6 @@ The `/memory` endpoint allows you to simulate memory utilization by allocating s
 - Memory is filled with data to prevent compiler optimizations
 - Multiple concurrent allocations are supported
 
-#### Duration Management
-- `duration=0`: Memory remains allocated until server restart or manual cleanup
-- `duration>0`: Memory is automatically freed after the specified time
-- Context cancellation (client disconnect) triggers immediate cleanup
-
 #### Memory Statistics
 - Real-time heap size monitoring via `runtime.MemStats`
 - Active allocation tracking with unique keys
@@ -375,19 +310,16 @@ The `/memory` endpoint allows you to simulate memory utilization by allocating s
 #### GET Request - Allocate Memory
 ```bash
 # Allocate 50MB for 30 seconds
-curl "http://localhost:8080/memory?size=50&duration=30&token=your-token"
+curl "http://localhost:8080/memory?size=50&duration=30"
 
 # Allocate 200MB indefinitely
-curl "http://localhost:8080/memory?size=200&duration=0&token=your-token"
-
-# Get text format response
-curl "http://localhost:8080/memory?size=100&format=text&token=your-token"
+curl "http://localhost:8080/memory?size=200&duration=0"
 ```
 
 #### POST Request - JSON Body
 ```bash
 # Allocate memory using JSON payload
-curl -X POST "http://localhost:8080/memory?token=your-token" \
+curl -X POST "http://localhost:8080/memory" \
   -H "Content-Type: application/json" \
   -d '{
     "size": 150,
@@ -400,10 +332,10 @@ curl -X POST "http://localhost:8080/memory?token=your-token" \
 #### JSON Response (Default)
 ```json
 {
-  "size_mb": 100,
-  "duration": 60,
+  "size_mb": "100",
+  "duration": "60",
   "allocation_key": "20250919-162329-100",
-  "current_heap_mb": 105.47,
+  "current_heap_mb": "105.47",
   "message": "Allocated 100MB of memory for 60 seconds"
 }
 ```
@@ -415,28 +347,3 @@ Current heap size: 105.47MB
 Allocation key: 20250919-162329-100
 ```
 
-### Memory Testing Use Cases
-
-#### OOM Testing
-```bash
-# Gradually increase memory usage
-for size in 100 500 1000 2000; do
-  curl "http://localhost:8080/memory?size=$size&duration=0&token=your-token"
-  sleep 5
-done
-```
-
-#### Memory Pressure Testing
-```bash
-# Create multiple concurrent allocations
-for i in {1..5}; do
-  curl "http://localhost:8080/memory?size=200&duration=120&token=your-token" &
-done
-wait
-```
-
-#### Kubernetes Resource Limit Testing
-```bash
-# Test near resource limits (adjust based on your limits)
-curl "http://localhost:8080/memory?size=1900&duration=300&token=your-token"
-```

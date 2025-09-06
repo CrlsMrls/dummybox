@@ -3,6 +3,7 @@ package log
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -176,8 +177,8 @@ func LogHandler(w http.ResponseWriter, r *http.Request) {
 		"level":       params.Level,
 		"size":        params.Size,
 		"message":     responseMessage,
-		"interval":    params.Interval,
-		"duration":    params.Duration,
+		"interval":    fmt.Sprintf("%d", params.Interval),
+		"duration":    fmt.Sprintf("%d", params.Duration),
 		"correlation": params.Correlation,
 		"status":      "log generation started",
 	})
