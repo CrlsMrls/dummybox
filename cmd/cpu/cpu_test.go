@@ -11,10 +11,10 @@ import (
 
 // MockCPULoadGenerator is a test implementation that doesn't actually consume CPU.
 type MockCPULoadGenerator struct {
-	WorkCalls       []int
-	SleepCalls      []time.Duration
-	WorkCallCount   int
-	SleepCallCount  int
+	WorkCalls      []int
+	SleepCalls     []time.Duration
+	WorkCallCount  int
+	SleepCallCount int
 }
 
 func (m *MockCPULoadGenerator) DoWork(workSize int) int {
@@ -69,7 +69,7 @@ func TestValidateIntensity(t *testing.T) {
 
 func TestGetIntensityConfig(t *testing.T) {
 	tests := []struct {
-		intensity CPUIntensity
+		intensity    CPUIntensity
 		expectExists bool
 	}{
 		{Light, true},
@@ -283,9 +283,9 @@ func TestCPUWorker_IntensityLevels(t *testing.T) {
 	defer teardownMockGenerator()
 
 	tests := []struct {
-		intensity      CPUIntensity
-		expectedWork   int
-		expectedSleep  time.Duration
+		intensity     CPUIntensity
+		expectedWork  int
+		expectedSleep time.Duration
 	}{
 		{Light, 5000, 400 * time.Millisecond},
 		{Medium, 15000, 250 * time.Millisecond},
@@ -296,14 +296,14 @@ func TestCPUWorker_IntensityLevels(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(string(tt.intensity), func(t *testing.T) {
 			config, _ := GetIntensityConfig(tt.intensity)
-			
+
 			if config.WorkSize != tt.expectedWork {
-				t.Errorf("intensity %s: expected work size %d, got %d", 
+				t.Errorf("intensity %s: expected work size %d, got %d",
 					tt.intensity, tt.expectedWork, config.WorkSize)
 			}
-			
+
 			if config.SleepDuration != tt.expectedSleep {
-				t.Errorf("intensity %s: expected sleep duration %v, got %v", 
+				t.Errorf("intensity %s: expected sleep duration %v, got %v",
 					tt.intensity, tt.expectedSleep, config.SleepDuration)
 			}
 		})
@@ -316,7 +316,7 @@ func TestGetCPUStats(t *testing.T) {
 
 	// Test initial stats
 	stats := GetCPUStats()
-	
+
 	if stats["total_jobs"].(int) != 0 {
 		t.Errorf("expected 0 active jobs initially, got %v", stats["total_jobs"])
 	}
@@ -342,7 +342,7 @@ func TestGetCPUStats(t *testing.T) {
 
 func TestGetAvailableIntensities(t *testing.T) {
 	intensities := GetAvailableIntensities()
-	
+
 	expectedLevels := []CPUIntensity{Light, Medium, Heavy, Extreme}
 	for _, level := range expectedLevels {
 		config, exists := intensities[level]

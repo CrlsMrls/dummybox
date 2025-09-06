@@ -50,7 +50,7 @@ To run tests for a specific package:
 go test ./server
 go test ./config
 go test ./logger
-go test ./cmd/delay
+go test ./cmd/respond
 ```
 
 To run only unit tests (exclude integration tests):
@@ -62,7 +62,7 @@ go test -short ./...
 To run only integration tests for a specific command:
 
 ```bash
-go test ./cmd/delay -run Integration
+go test ./cmd/respond -run Integration
 ```
 
 Run tests with coverage
@@ -83,7 +83,7 @@ The project is tested using separation between unit and integration tests:
 
 1. **Unit Tests**: Test individual handler functions in isolation
    - Located in `cmd/*/` packages
-   - Package name matches the implementation (e.g., `package delay`)
+   - Package name matches the implementation (e.g., `package respond`)
    - Fast, focused on handler logic only
 
 2. **Integration Tests**: Test endpoints through the full server stack
@@ -170,11 +170,11 @@ VERSION=$(cat VERSION) KO_DOCKER_REPO=ko.local ko publish -B -t $(cat VERSION) -
 make test
 go test ./...
 
-# Run tests for delay command (unit + integration)
-go test ./cmd/delay -v
+# Run tests for respond command (unit + integration)
+go test ./cmd/respond -v
 
-# Run only integration tests for delay
-go test ./cmd/delay -run Integration -v
+# Run only integration tests for respond
+go test ./cmd/respond -run Integration -v
 
 # Run server tests
 go test ./server -v

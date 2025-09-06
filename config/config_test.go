@@ -130,8 +130,8 @@ func TestNewConfig_Precedence(t *testing.T) {
 
 func TestConfig_Validate(t *testing.T) {
 	tests := []struct {
-		name      string
-		cfg       Config
+		name        string
+		cfg         Config
 		expectError bool
 	}{
 		{"valid", Config{Port: 8080, LogLevel: "info"}, false},

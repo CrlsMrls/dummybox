@@ -23,8 +23,8 @@ var (
 	)
 	httpRequestDurationSeconds = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name: "http_request_duration_seconds",
-			Help: "Duration of HTTP requests.",
+			Name:    "http_request_duration_seconds",
+			Help:    "Duration of HTTP requests.",
 			Buckets: prometheus.DefBuckets,
 		},
 		[]string{"method", "path"},
@@ -56,7 +56,6 @@ func InitMetrics() *prometheus.Registry {
 func MetricsHandler(reg *prometheus.Registry) http.Handler {
 	return promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 }
-
 
 // HTTPMetricsMiddleware collects HTTP request metrics.
 func HTTPMetricsMiddleware(next http.Handler) http.Handler {

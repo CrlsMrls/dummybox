@@ -1,4 +1,3 @@
-
 package config
 
 import (
@@ -57,7 +56,6 @@ func New() (*Config, error) {
 			}
 		}
 	}
-
 
 	var cfg Config
 	if err := v.Unmarshal(&cfg); err != nil {

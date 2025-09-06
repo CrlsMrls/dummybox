@@ -15,12 +15,12 @@ import (
 
 // RequestInfo holds detailed HTTP request information.
 type RequestInfo struct {
-	Headers        map[string][]string `json:"headers"`
-	Method         string              `json:"method"`
-	URL            string              `json:"url"`
+	Headers         map[string][]string `json:"headers"`
+	Method          string              `json:"method"`
+	URL             string              `json:"url"`
 	QueryParameters map[string][]string `json:"query_parameters"`
-	Body           string              `json:"body"`
-	JWT            *JWTInfo            `json:"jwt,omitempty"`
+	Body            string              `json:"body"`
+	JWT             *JWTInfo            `json:"jwt,omitempty"`
 }
 
 // JWTInfo holds decoded JWT token information.
@@ -46,9 +46,9 @@ var funcMap = template.FuncMap{
 // RequestHandler returns detailed HTTP request information.
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
 	info := RequestInfo{
-		Headers:        r.Header,
-		Method:         r.Method,
-		URL:            r.URL.String(),
+		Headers:         r.Header,
+		Method:          r.Method,
+		URL:             r.URL.String(),
 		QueryParameters: r.URL.Query(),
 	}
 

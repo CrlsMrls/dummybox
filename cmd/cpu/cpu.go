@@ -59,7 +59,7 @@ var (
 	cpuMutex        sync.RWMutex
 	jobCounter      int64
 	loadGenerator   CPULoadGenerator = &ProductionCPULoadGenerator{}
-	intensityLevels = map[CPUIntensity]IntensityConfig{
+	intensityLevels                  = map[CPUIntensity]IntensityConfig{
 		Light: {
 			WorkSize:      5000,
 			WorkDuration:  100 * time.Millisecond,
@@ -208,7 +208,7 @@ func CPUHandler(w http.ResponseWriter, r *http.Request) {
 				"sleep_duration": config.SleepDuration.String(),
 				"description":    config.Description,
 			},
-			"message":     fmt.Sprintf("Generating %s CPU load for %d seconds", params.Intensity, params.Duration),
+			"message": fmt.Sprintf("Generating %s CPU load for %d seconds", params.Intensity, params.Duration),
 		})
 	}
 }
@@ -221,7 +221,7 @@ func generateCPULoad(ctx context.Context, jobKey string, intensity CPUIntensity)
 	}
 
 	numWorkers := runtime.NumCPU()
-	
+
 	log.Info().
 		Str("job_key", jobKey).
 		Int("workers", numWorkers).
@@ -259,7 +259,7 @@ func cpuWorker(ctx context.Context, jobKey string, workerID int, config Intensit
 				_ = generator.DoWork(config.WorkSize)
 				// Continue doing work until the work duration is reached
 			}
-			
+
 			// Sleep between work cycles (if configured)
 			if config.SleepDuration > 0 {
 				generator.Sleep(config.SleepDuration)

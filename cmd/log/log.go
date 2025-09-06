@@ -104,9 +104,9 @@ func LogHandler(w http.ResponseWriter, r *http.Request) {
 		Msg("log generation request received")
 
 	// Create contexts for different purposes
-	var immediateCtx context.Context   // For immediate log entry (uses request context)
-	var backgroundCtx context.Context  // For background logging (independent context)
-	
+	var immediateCtx context.Context  // For immediate log entry (uses request context)
+	var backgroundCtx context.Context // For background logging (independent context)
+
 	if params.Correlation == "false" {
 		immediateCtx = context.Background()
 		backgroundCtx = context.Background()
@@ -131,12 +131,12 @@ func LogHandler(w http.ResponseWriter, r *http.Request) {
 		go func() {
 			var ticker *time.Ticker
 			var durationTimer *time.Timer
-			
+
 			if params.Interval > 0 {
 				ticker = time.NewTicker(time.Duration(params.Interval) * time.Second)
 				defer ticker.Stop()
 			}
-			
+
 			if params.Duration > 0 {
 				durationTimer = time.NewTimer(time.Duration(params.Duration) * time.Second)
 				defer durationTimer.Stop()

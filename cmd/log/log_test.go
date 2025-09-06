@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -48,11 +49,11 @@ func TestLogHandler_GET_DefaultParameters(t *testing.T) {
 	if response["size"] != "short" {
 		t.Errorf("Expected default size 'short', got %v", response["size"])
 	}
-	if response["interval"] != float64(0) {
-		t.Errorf("Expected default interval 0, got %v", response["interval"])
+	if response["interval"] != "0" {
+		t.Errorf("Expected default interval '0', got %v", response["interval"])
 	}
-	if response["duration"] != float64(0) {
-		t.Errorf("Expected default duration 0, got %v", response["duration"])
+	if response["duration"] != "0" {
+		t.Errorf("Expected default duration '0', got %v", response["duration"])
 	}
 	if response["correlation"] != "true" {
 		t.Errorf("Expected default correlation 'true', got %v", response["correlation"])
@@ -208,7 +209,7 @@ func TestLogHandler_InvalidParameters(t *testing.T) {
 		{
 			name:        "invalid size",
 			url:         "/log?level=info&size=huge",
-			expectedMsg: "short", // should default to short  
+			expectedMsg: "short", // should default to short
 		},
 		{
 			name:        "invalid interval",
@@ -372,7 +373,7 @@ func TestGetActualLevel(t *testing.T) {
 
 	for _, tt := range tests {
 		result := getActualLevel(tt.input)
-		
+
 		// Check if result is in expected values
 		found := false
 		for _, expected := range tt.expected {
@@ -381,7 +382,7 @@ func TestGetActualLevel(t *testing.T) {
 				break
 			}
 		}
-		
+
 		if !found {
 			t.Errorf("getActualLevel(%q) = %q, expected one of %v", tt.input, result, tt.expected)
 		}
@@ -402,18 +403,18 @@ func TestGetActualMessage(t *testing.T) {
 
 	for _, tt := range tests {
 		result := getActualMessage(tt.customMessage, tt.size)
-		
+
 		if tt.expectCustom {
 			if tt.customMessage == "" {
 				t.Errorf("Expected custom message but got generated message")
 				continue
 			}
-			
+
 			// Should contain custom message and end with (Fake message)
 			if !strings.HasSuffix(result, "(Fake message)") {
 				t.Errorf("Custom message should end with '(Fake message)', got: %s", result)
 			}
-			
+
 			if strings.HasSuffix(tt.customMessage, "(Fake message)") {
 				// Already has suffix, should not duplicate
 				if result != tt.customMessage {
@@ -437,21 +438,21 @@ func TestGetActualMessage(t *testing.T) {
 
 func TestLogHandler_NewParameters(t *testing.T) {
 	tests := []struct {
-		name        string
-		url         string
-		expectedDuration int
+		name                string
+		url                 string
+		expectedDuration    int
 		expectedCorrelation string
 	}{
 		{
-			name:        "with duration parameter",
-			url:         "/log?duration=300&correlation=false",
-			expectedDuration: 300,
+			name:                "with duration parameter",
+			url:                 "/log?duration=300&correlation=false",
+			expectedDuration:    300,
 			expectedCorrelation: "false",
 		},
 		{
-			name:        "with random level and size",
-			url:         "/log?level=random&size=random",
-			expectedDuration: 0,
+			name:                "with random level and size",
+			url:                 "/log?level=random&size=random",
+			expectedDuration:    0,
 			expectedCorrelation: "true",
 		},
 	}
@@ -472,8 +473,8 @@ func TestLogHandler_NewParameters(t *testing.T) {
 				t.Errorf("Failed to parse JSON response: %v", err)
 			}
 
-			if response["duration"] != float64(tt.expectedDuration) {
-				t.Errorf("Expected duration %d, got %v", tt.expectedDuration, response["duration"])
+			if response["duration"] != fmt.Sprintf("%d", tt.expectedDuration) {
+				t.Errorf("Expected duration '%d', got %v", tt.expectedDuration, response["duration"])
 			}
 			if response["correlation"] != tt.expectedCorrelation {
 				t.Errorf("Expected correlation '%s', got %v", tt.expectedCorrelation, response["correlation"])
@@ -484,7 +485,7 @@ func TestLogHandler_NewParameters(t *testing.T) {
 
 func TestLogHandler_CorrelationID(t *testing.T) {
 	correlationID := "test-correlation-123"
-	
+
 	req := httptest.NewRequest(http.MethodGet, "/log?level=info", nil)
 	req.Header.Set("X-Correlation-ID", correlationID)
 	w := httptest.NewRecorder()

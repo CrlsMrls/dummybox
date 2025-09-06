@@ -35,13 +35,13 @@ type Info struct {
 		GID string `json:"gid"`
 	} `json:"user"`
 	ClusterPosition struct {
-		ContainerID   string `json:"container_id"`
-		ImageName     string `json:"image_name"`
-		ImageTag      string `json:"image_tag"`
-		NodeName      string `json:"node_name"`		
-		PodName       string `json:"pod_name"`
-		Namespace     string `json:"namespace"`
-		ResourceLimits string `json:"resource_limits"`
+		ContainerID      string `json:"container_id"`
+		ImageName        string `json:"image_name"`
+		ImageTag         string `json:"image_tag"`
+		NodeName         string `json:"node_name"`
+		PodName          string `json:"pod_name"`
+		Namespace        string `json:"namespace"`
+		ResourceLimits   string `json:"resource_limits"`
 		ResourceRequests string `json:"resource_requests"`
 	} `json:"cluster_position"`
 	Metrics struct {

@@ -7,11 +7,11 @@ import (
 	"runtime"
 
 	"github.com/crlsmrls/dummybox/cmd/cpu"
-	"github.com/crlsmrls/dummybox/cmd/delay"
 	"github.com/crlsmrls/dummybox/cmd/info"
 	logcmd "github.com/crlsmrls/dummybox/cmd/log"
 	"github.com/crlsmrls/dummybox/cmd/memory"
 	"github.com/crlsmrls/dummybox/cmd/request"
+	"github.com/crlsmrls/dummybox/cmd/respond"
 	"github.com/crlsmrls/dummybox/config"
 	"github.com/crlsmrls/dummybox/metrics"
 	"github.com/go-chi/chi/v5"
@@ -81,10 +81,10 @@ func setupRoutes(router *chi.Mux, cfg *config.Config, reg *prometheus.Registry) 
 	router.HandleFunc("/request", request.RequestHandler)
 
 	// Command endpoints (protected with token auth)
-	router.Route("/delay", func(r chi.Router) {
+	router.Route("/respond", func(r chi.Router) {
 		r.Use(TokenAuthMiddleware(cfg))
-		r.Get("/", delay.DelayHandler)
-		r.Post("/", delay.DelayHandler)
+		r.Get("/", respond.RespondHandler)
+		r.Post("/", respond.RespondHandler)
 	})
 
 	router.Route("/log", func(r chi.Router) {

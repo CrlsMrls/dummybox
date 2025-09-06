@@ -15,7 +15,7 @@ func TestMemoryEndpoint_BasicHTTP(t *testing.T) {
 	// Simple integration test without complex middleware
 	req := httptest.NewRequest(http.MethodGet, "/memory?size=20&duration=5", nil)
 	w := httptest.NewRecorder()
-	
+
 	MemoryHandler(w, req)
 
 	if w.Code != http.StatusOK {
@@ -42,7 +42,7 @@ func TestMemoryEndpoint_POST_JSON(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/memory", bytes.NewBuffer(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
-	
+
 	MemoryHandler(w, req)
 
 	if w.Code != http.StatusOK {
@@ -66,7 +66,7 @@ func TestMemoryEndpoint_DurationBehavior(t *testing.T) {
 	// Test that memory allocation with short duration actually gets cleaned up
 	req := httptest.NewRequest(http.MethodGet, "/memory?size=10&duration=1", nil)
 	w := httptest.NewRecorder()
-	
+
 	MemoryHandler(w, req)
 
 	if w.Code != http.StatusOK {
@@ -102,7 +102,7 @@ func TestMemoryEndpoint_ZeroDuration(t *testing.T) {
 	// Test that zero duration keeps memory allocated indefinitely
 	req := httptest.NewRequest(http.MethodGet, "/memory?size=15&duration=0", nil)
 	w := httptest.NewRecorder()
-	
+
 	MemoryHandler(w, req)
 
 	if w.Code != http.StatusOK {
@@ -133,7 +133,7 @@ func TestMemoryEndpoint_ZeroDuration(t *testing.T) {
 func TestMemoryEndpoint_TextFormat(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/memory?size=55&duration=25&format=text", nil)
 	w := httptest.NewRecorder()
-	
+
 	MemoryHandler(w, req)
 
 	if w.Code != http.StatusOK {

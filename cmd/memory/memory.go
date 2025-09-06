@@ -26,7 +26,7 @@ var (
 // MemoryHandler generates memory utilization based on specified parameters.
 func MemoryHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context() // Only use request context for logging in this function
-	
+
 	params := MemoryParams{
 		Size:     100, // Default 100MB
 		Duration: 60,  // Default 60 seconds
@@ -98,17 +98,17 @@ func MemoryHandler(w http.ResponseWriter, r *http.Request) {
 	if format == "text" {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Allocated %dMB of memory for %d seconds\nCurrent heap size: %.2fMB\nAllocation key: %s\n", 
+		fmt.Fprintf(w, "Allocated %dMB of memory for %d seconds\nCurrent heap size: %.2fMB\nAllocation key: %s\n",
 			params.Size, params.Duration, float64(memStats.HeapAlloc)/1024/1024, allocKey)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"size_mb":          fmt.Sprintf("%d", params.Size),
-			"duration":         fmt.Sprintf("%d", params.Duration),
-			"allocation_key":   allocKey,
-			"current_heap_mb":  fmt.Sprintf("%.2f", float64(memStats.HeapAlloc)/1024/1024),
-			"message":          fmt.Sprintf("Allocated %dMB of memory for %d seconds", params.Size, params.Duration),
+			"size_mb":         fmt.Sprintf("%d", params.Size),
+			"duration":        fmt.Sprintf("%d", params.Duration),
+			"allocation_key":  allocKey,
+			"current_heap_mb": fmt.Sprintf("%.2f", float64(memStats.HeapAlloc)/1024/1024),
+			"message":         fmt.Sprintf("Allocated %dMB of memory for %d seconds", params.Size, params.Duration),
 		})
 	}
 }
@@ -174,7 +174,7 @@ func GetMemoryStats() map[string]interface{} {
 
 	activeAllocations := make(map[string]int)
 	totalAllocatedMB := 0
-	
+
 	for key, blocks := range memoryBlocks {
 		sizeMB := 0
 		for _, block := range blocks {
@@ -186,10 +186,10 @@ func GetMemoryStats() map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"active_allocations":     activeAllocations,
-		"total_allocated_mb":     totalAllocatedMB,
-		"current_heap_mb":        float64(memStats.HeapAlloc) / 1024 / 1024,
-		"total_heap_mb":          float64(memStats.HeapSys) / 1024 / 1024,
-		"gc_count":               memStats.NumGC,
+		"active_allocations": activeAllocations,
+		"total_allocated_mb": totalAllocatedMB,
+		"current_heap_mb":    float64(memStats.HeapAlloc) / 1024 / 1024,
+		"total_heap_mb":      float64(memStats.HeapSys) / 1024 / 1024,
+		"gc_count":           memStats.NumGC,
 	}
 }

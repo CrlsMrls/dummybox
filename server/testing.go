@@ -27,10 +27,10 @@ func NewTestServer(cfg *config.Config, logWriter io.Writer, reg *prometheus.Regi
 	if reg == nil {
 		reg = metrics.InitMetrics()
 	}
-	
+
 	server := New(cfg, logWriter, reg)
 	httpServer := httptest.NewServer(server.router)
-	
+
 	return &TestServer{
 		Server:     server,
 		HTTPServer: httpServer,
@@ -43,7 +43,7 @@ func NewTestServerWithRecorder(cfg *config.Config, logWriter io.Writer, reg *pro
 	if reg == nil {
 		reg = metrics.InitMetrics()
 	}
-	
+
 	return New(cfg, logWriter, reg)
 }
 

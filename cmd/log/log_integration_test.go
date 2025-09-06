@@ -189,7 +189,7 @@ func TestLogEndpoint_CorrelationID(t *testing.T) {
 	srv := server.NewTestServerWithRecorder(cfg, nil, nil)
 
 	correlationID := "test-correlation-12345"
-	
+
 	req := httptest.NewRequest(http.MethodGet, "/log?level=info", nil)
 	req.Header.Set("X-Correlation-ID", correlationID)
 	w := httptest.NewRecorder()

@@ -29,10 +29,10 @@ func TestMemoryHandler_GET_DefaultParameters(t *testing.T) {
 	}
 
 	// Check default values
-	if response["size_mb"] != float64(100) {
+	if response["size_mb"] != "100" {
 		t.Errorf("expected size_mb 100, got %v", response["size_mb"])
 	}
-	if response["duration"] != float64(60) {
+	if response["duration"] != "60" {
 		t.Errorf("expected duration 60, got %v", response["duration"])
 	}
 
@@ -287,7 +287,7 @@ func TestMemoryAllocation(t *testing.T) {
 func TestMemoryHandler_ContextCancellation(t *testing.T) {
 	// Create a context that will be cancelled
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	req := httptest.NewRequest(http.MethodGet, "/memory?size=30&duration=300", nil).WithContext(ctx)
 	w := httptest.NewRecorder()
 

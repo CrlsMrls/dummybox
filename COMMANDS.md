@@ -27,15 +27,17 @@ All endpoints support the `X-Correlation-ID` HTTP header for request tracing. If
 
 ---
 
-## `/delay` - Response Delay Simulation
+## `/respond` - Configurable HTTP Response Simulation
 
 ### Purpose
-The delay endpoint introduces configurable delays in HTTP responses, making it ideal for testing:
+The respond endpoint introduces configurable delays, status codes, and custom HTTP response headers, making it ideal for testing:
 - Timeout handling in client applications
 - Load balancer behavior with slow backends
 - Circuit breaker patterns
 - Performance monitoring and alerting
 - Network latency simulation
+- Custom HTTP header scenarios
+- API mocking with dynamic response headers
 
 
 ### Parameters
@@ -45,29 +47,39 @@ The delay endpoint introduces configurable delays in HTTP responses, making it i
 | `duration` | integer | No | `0` | 0-300 | Delay duration in seconds before responding |
 | `code` | integer | No | `200` | 100-599 | HTTP status code to return in the response |
 | `format` | string | No | `json` | `json`, `text` | Response format type |
+| `headers` | object | No | `{}` | - | Custom HTTP response headers (POST only) |
+| `header_name` | string | No | - | - | Custom header name (GET only, paired with header_value) |
+| `header_value` | string | No | - | - | Custom header value (GET only, paired with header_name) |
 
 
 ### Request Examples
 
 #### GET Request with Query Parameters
 ```bash
-# Basic delay of 2 seconds
-curl "http://localhost:8080/delay?duration=2"
+# Basic response with 2 second delay
+curl "http://localhost:8080/respond?duration=2"
 
 # Custom status code with delay
-curl "http://localhost:8080/delay?duration=5&code=500"
+curl "http://localhost:8080/respond?duration=5&code=500"
+
+# Response with custom headers
+curl "http://localhost:8080/respond?duration=0&code=200&header_name=X-Custom-Agent&header_value=MyApp&header_name=X-Request-ID&header_value=12345"
 ```
 
 #### POST Request with JSON Body and correlation ID
 ```bash
-curl -X POST "http://localhost:8080/delay" \
+curl -X POST "http://localhost:8080/respond" \
   -H "Content-Type: application/json" \
-  -H "X-Correlation-ID: test-scenario-001"
+  -H "X-Correlation-ID: test-scenario-001" \
   -H "X-Auth-Token: your-token" \
   -d '{
     "duration": 3,
     "code": 202,
-    "format": "json"
+    "headers": {
+      "X-Custom-Agent": "MyApp",
+      "X-Request-ID": "12345",
+      "Authorization": "Bearer token123"
+    }
   }'
 ```
 
@@ -78,14 +90,39 @@ curl -X POST "http://localhost:8080/delay" \
 {
   "duration": "2",
   "code": "200",
-  "message": "Delayed for 2 seconds with status code 200"
+  "message": "Responded after 2 seconds with status code 200"
+}
+```
+
+#### JSON Response with Headers
+```json
+{
+  "duration": "0",
+  "code": "200",
+  "message": "Responded after 0 seconds with status code 200",
+  "headers": {
+    "X-Custom-Agent": "MyApp",
+    "X-Request-ID": "12345",
+    "Authorization": "Bearer token123"
+  }
 }
 ```
 
 #### Text Response
 ```
-Delayed for 2 seconds with status code 200
+Responded after 2 seconds with status code 200
 ```
+
+#### Text Response with Headers
+```
+Responded after 0 seconds with status code 200
+Custom Headers:
+  X-Custom-Agent: MyApp
+  X-Request-ID: 12345
+  Authorization: Bearer token123
+```
+
+**Note:** Custom headers are also set in the actual HTTP response headers, not just included in the response body for visibility.
 
 ---
 

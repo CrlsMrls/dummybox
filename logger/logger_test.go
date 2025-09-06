@@ -11,7 +11,7 @@ import (
 
 func TestInitLogger(t *testing.T) {
 	tests := []struct {
-		levelStr   string
+		levelStr string
 		expected zerolog.Level
 	}{
 		{"debug", zerolog.DebugLevel},

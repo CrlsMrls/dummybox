@@ -7,7 +7,7 @@ Commands that affect the system state (like memory allocation) can be protected 
 A User Interface is also provided to interact with the endpoints through a web browser, although the main focus is on HTTP API usage.
 
 DummyBox serves as a "dummy" application that can:
-- **Mock HTTP responses** with custom status codes and delays
+- **Mock HTTP responses** with custom status codes, delays, and properties
 - **Expose system information** including environment variables and container details
 - **Generate Prometheus metrics** for monitoring system validation
 - **Generate logs** with configurable log levels and structured JSON format
@@ -99,14 +99,16 @@ DummyBox provides several command endpoints for testing different scenarios. The
 
 > 📖 **For detailed documentation with examples and use cases, see [COMMANDS.md](COMMANDS.md)**
 
-### `/delay` - Response Delay Simulation
+### `/respond` - Configurable HTTP Response Simulation
 
-Introduces configurable delays in responses for testing timeout handling and latency scenarios.
+Introduces configurable delays, status codes, and custom HTTP response headers for testing various scenarios including timeout handling, latency, and custom header scenarios.
 
 **Parameters**: 
 - `duration` (0-300s)
 - `code` (HTTP status)
 - `format` (json/text)
+- `header_name`/`header_value` (custom headers for GET)
+- `headers` (custom headers object for POST)
 
 ### `/log` - Log Generation
 
