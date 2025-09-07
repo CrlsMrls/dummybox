@@ -1,0 +1,7 @@
+{"level":"info","config":{"Port":8080,"LogLevel":"info","MetricsPath":"/metrics","TLSCertFile":"","TLSKeyFile":"","AuthToken":""},"time":"2025-09-21T22:02:37+02:00","message":"configuration loaded"}
+{"level":"info","time":"2025-09-21T22:02:37+02:00","message":"Prometheus metrics initialized."}
+{"level":"info","time":"2025-09-21T22:02:37+02:00","message":"Starting server on port 8080"}
+{"level":"info","time":"2025-09-21T22:02:37+02:00","message":"TLS disabled"}
+{"level":"info","ip":"[::1]:61920","user_agent":"curl/8.7.1","correlation_id":"52164038-d405-498b-8ebd-aab1c62b18cb","method":"GET","url":"/version","status":200,"size":17,"duration":0.051542,"time":"2025-09-21T22:02:41+02:00","source":"/Users/carlos/src/dummybox/server/server.go:56","message":"request"}
+{"level":"info","time":"2025-09-21T22:02:41+02:00","message":"Shutting down server..."}
+{"level":"info","time":"2025-09-21T22:02:41+02:00","message":"Server gracefully stopped."}

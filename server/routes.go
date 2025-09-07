@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/crlsmrls/dummybox/cmd"
 	"github.com/crlsmrls/dummybox/cmd/cpu"
 	"github.com/crlsmrls/dummybox/cmd/info"
 	"github.com/crlsmrls/dummybox/cmd/kill"
@@ -37,17 +38,17 @@ func setupRoutes(router *chi.Mux, cfg *config.Config, reg *prometheus.Registry) 
 			return
 		}
 
-		// Placeholder data for the template
+		// Use actual version information from build-time variables
 		data := struct {
 			Version   string
 			GoVersion string
 			BuildDate string
 			GitCommit string
 		}{
-			Version:   "v0.0.1",
-			GoVersion: "go1.21",
-			BuildDate: "2025-01-01",
-			GitCommit: "abcdef12345",
+			Version:   cmd.Version,
+			GoVersion: cmd.GoVersion,
+			BuildDate: cmd.BuildDate,
+			GitCommit: cmd.GitCommit,
 		}
 
 		w.Header().Set("Content-Type", "text/html")
@@ -73,11 +74,7 @@ func setupRoutes(router *chi.Mux, cfg *config.Config, reg *prometheus.Registry) 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("positions"))
 	})
-	router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
-		log.Ctx(r.Context()).Info().Msg("version handler called")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("version"))
-	})
+	router.HandleFunc("/version", cmd.VersionHandler)
 	router.Get("/info", info.InfoHandler)
 	router.HandleFunc("/request", request.RequestHandler)
 
