@@ -8,6 +8,7 @@ import (
 
 	"github.com/crlsmrls/dummybox/cmd/cpu"
 	"github.com/crlsmrls/dummybox/cmd/info"
+	"github.com/crlsmrls/dummybox/cmd/kill"
 	logcmd "github.com/crlsmrls/dummybox/cmd/log"
 	"github.com/crlsmrls/dummybox/cmd/memory"
 	"github.com/crlsmrls/dummybox/cmd/request"
@@ -103,6 +104,12 @@ func setupRoutes(router *chi.Mux, cfg *config.Config, reg *prometheus.Registry) 
 		r.Use(TokenAuthMiddleware(cfg))
 		r.Get("/", cpu.CPUHandler)
 		r.Post("/", cpu.CPUHandler)
+	})
+
+	router.Route("/kill", func(r chi.Router) {
+		r.Use(TokenAuthMiddleware(cfg))
+		r.Get("/", kill.KillHandler)
+		r.Post("/", kill.KillHandler)
 	})
 
 	// Metrics endpoint

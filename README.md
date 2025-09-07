@@ -108,7 +108,7 @@ Introduces configurable delays, status codes, and custom HTTP response headers f
 - `code` (HTTP status)
 - `format` (json/text)
 - `header_name`/`header_value` (custom headers for GET)
-- `headers` (custom headers object for POST)
+- `headers` (custom headers JSON object for POST)
 
 ### `/log` - Log Generation
 
@@ -140,6 +140,14 @@ Allocates memory to simulate memory pressure for testing OOM conditions and reso
 - `size` (1-8192 MB)
 - `duration` (0-3600s, 0=forever)
 - `format` (json/text)
+
+### `/kill` - Process Termination
+
+Terminates the application with a configurable exit code and delay, useful for testing graceful shutdown, failover mechanisms, and container restart policies.
+
+**Parameters**:
+- `delay` (0-3600s): Delay before termination
+- `code` (0-255): Exit code to use when terminating
 
 
 **DummyBox** - Making container testing simple! 🚀

@@ -29,16 +29,13 @@ All endpoints support the `X-Correlation-ID` HTTP header for request tracing. If
 
 ## `/respond` - Configurable HTTP Response Simulation
 
-### Purpose
-The respond endpoint introduces configurable delays, status codes, and custom HTTP response headers, making it ideal for testing:
+The `/respond` endpoint allows you to simulate HTTP responses with configurable delays, status codes, and custom headers. This is useful for testing:
+
 - Timeout handling in client applications
 - Load balancer behavior with slow backends
-- Circuit breaker patterns
 - Performance monitoring and alerting
 - Network latency simulation
 - Custom HTTP header scenarios
-- API mocking with dynamic response headers
-
 
 ### Parameters
 
@@ -77,64 +74,39 @@ curl -X POST "http://localhost:8080/respond" \
     "code": 202,
     "headers": {
       "X-Custom-Agent": "MyApp",
-      "X-Request-ID": "12345",
-      "Authorization": "Bearer token123"
+      "X-Request-ID": "12345"
     }
   }'
 ```
 
-### Response Examples
+This request will respond after 3 seconds, HTTP status 202, the specified custom headers the following body:
 
-#### JSON Response (default)
 ```json
 {
-  "duration": "2",
-  "code": "200",
-  "message": "Responded after 2 seconds with status code 200"
-}
-```
-
-#### JSON Response with Headers
-```json
-{
-  "duration": "0",
-  "code": "200",
-  "message": "Responded after 0 seconds with status code 200",
+  "duration": "3",
+  "code": "202",
+  "message": "Responded after 3 seconds with status code 202",
   "headers": {
     "X-Custom-Agent": "MyApp",
     "X-Request-ID": "12345",
-    "Authorization": "Bearer token123"
   }
 }
 ```
 
-#### Text Response
-```
-Responded after 2 seconds with status code 200
-```
-
-#### Text Response with Headers
-```
-Responded after 0 seconds with status code 200
-Custom Headers:
-  X-Custom-Agent: MyApp
-  X-Request-ID: 12345
-  Authorization: Bearer token123
-```
-
-**Note:** Custom headers are also set in the actual HTTP response headers, not just included in the response body for visibility.
+**Note:** Custom headers are also set in the actual HTTP response headers and in the response body for visibility.
 
 ---
 
 ## `/log` - Log Message Generation
 
 ### Purpose
-The log endpoint generates structured log messages for testing:
+The log endpoint generates structured log messages in the standard output. This is useful for testing:
 - Log aggregation systems (ELK, Splunk, etc.)
 - Monitoring and alerting systems
 - Log parsing and analysis tools
 - Structured logging pipelines
-- Application performance monitoring (APM)
+- Correlation ID tracing
+- Stress-testing logging infrastructure
 
 
 ### Parameters
@@ -382,5 +354,70 @@ curl -X POST "http://localhost:8080/memory" \
 Allocated 100MB of memory for 60 seconds
 Current heap size: 105.47MB
 Allocation key: 20250919-162329-100
+```
+
+---
+
+## `/kill` - Process Termination
+
+The `/kill` endpoint terminates the DummyBox application process with a configurable exit code and optional delay. This is useful for testing:
+
+- Recovery testing scenarios
+- Container restart policies and failover mechanisms in Kubernetes and other orchestrators
+- Graceful shutdown procedures
+- Process monitoring and alerting systems
+
+### Parameters
+
+| Parameter | Type | Required | Default | Valid Range | Description |
+|-----------|------|----------|---------|-------------|-------------|
+| `delay` | integer | No | `0` | 0-3600 | Delay in seconds before termination (max 1 hour) |
+| `code` | integer | No | `0` | 0-255 | Exit code to use when terminating the process |
+
+Exit Code Conventions:
+
+- `0`: Successful termination
+- `1`: General application error
+- `2`: Misuse of shell command
+- Custom codes (`3-127`): Application-specific error conditions
+- `128 + N`: Fatal error signal "N" (e.g., 130 = SIGINT)
+
+### Request Examples
+
+#### GET Request with Query Parameters
+```bash
+# Immediate termination with exit code 0
+curl "http://localhost:8080/kill?token=your-secret-token"
+
+# Terminate after 10 seconds with exit code 1
+curl "http://localhost:8080/kill?delay=10&code=1&token=your-secret-token"
+
+# Terminate after 30 seconds with exit code 42
+curl "http://localhost:8080/kill?delay=30&code=42" \
+  -H "X-Auth-Token: your-secret-token" \
+  -H "X-Correlation-ID: shutdown-test-001"
+```
+
+#### POST Request with JSON Body
+```bash
+curl -X POST "http://localhost:8080/kill" \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: your-secret-token" \
+  -H "X-Correlation-ID: graceful-shutdown" \
+  -d '{
+    "delay": 15,
+    "code": 2
+  }'
+```
+
+### Response Examples
+
+#### JSON Response (always JSON format)
+```json
+{
+  "delay": 10,
+  "code": 1,
+  "status": "termination scheduled"
+}
 ```
 
