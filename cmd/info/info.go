@@ -2,6 +2,7 @@ package info
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/crlsmrls/dummybox/cmd"
+	"github.com/crlsmrls/dummybox/metrics"
 	"github.com/rs/zerolog/log"
 )
 
@@ -45,7 +47,9 @@ type Info struct {
 		ResourceRequests string `json:"resource_requests"`
 	} `json:"cluster_position"`
 	Metrics struct {
-		Summary string `json:"summary"` // Placeholder for now
+		Summary     string                 `json:"summary"`
+		Details     map[string]interface{} `json:"details"`
+		LastUpdated time.Time              `json:"last_updated"`
 	} `json:"metrics"`
 }
 
@@ -64,7 +68,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	// Process Info
 	info.Process.Pid = os.Getpid()
 	info.Process.StartTime = startTime
-	info.Process.Uptime = time.Since(startTime).String()
+	info.Process.Uptime = formatUptime(time.Since(startTime))
 	info.Process.OS = runtime.GOOS
 	info.Process.Arch = runtime.GOARCH
 
@@ -89,8 +93,11 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	info.ClusterPosition.ResourceLimits = getEnvOrDefault("DUMMYBOX_RESOURCE_LIMITS", "not available")
 	info.ClusterPosition.ResourceRequests = getEnvOrDefault("DUMMYBOX_RESOURCE_REQUESTS", "not available")
 
-	// Metrics Summary (Placeholder)
-	info.Metrics.Summary = "Metrics endpoint not yet implemented (Task 4.1)"
+	// Metrics Summary
+	metricsData := metrics.GetMetricsInfo()
+	info.Metrics.Details = metricsData
+	info.Metrics.Summary = generateMetricsSummary(metricsData)
+	info.Metrics.LastUpdated = time.Now()
 
 	// Determine response type
 	acceptHeader := r.Header.Get("Accept")
@@ -137,4 +144,65 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return defaultValue
 	}
 	return val
+}
+
+// generateMetricsSummary creates a human-readable summary from metrics data
+func generateMetricsSummary(metricsData map[string]interface{}) string {
+	if status, exists := metricsData["status"]; exists {
+		return fmt.Sprintf("Metrics status: %v", status)
+	}
+
+	var summaryParts []string
+
+	// HTTP metrics summary
+	if httpData, exists := metricsData["http"].(map[string]interface{}); exists {
+		if totalReqs, exists := httpData["total_requests"].(float64); exists {
+			summaryParts = append(summaryParts, fmt.Sprintf("HTTP requests: %.0f", totalReqs))
+		}
+	}
+
+	// Runtime metrics summary
+	if runtimeData, exists := metricsData["runtime"].(map[string]interface{}); exists {
+		if goroutines, exists := runtimeData["goroutines"].(int); exists {
+			summaryParts = append(summaryParts, fmt.Sprintf("Goroutines: %d", goroutines))
+		}
+
+		if allocBytes, exists := runtimeData["allocated_bytes"].(int64); exists {
+			summaryParts = append(summaryParts, fmt.Sprintf("Memory allocated: %.2f MB", float64(allocBytes)/1024/1024))
+		}
+
+		if resMemBytes, exists := runtimeData["resident_memory_bytes"].(int64); exists {
+			summaryParts = append(summaryParts, fmt.Sprintf("Resident memory: %.2f MB", float64(resMemBytes)/1024/1024))
+		}
+	}
+
+	// Total metrics count
+	if totalMetrics, exists := metricsData["total_metrics_collected"].(int); exists {
+		summaryParts = append(summaryParts, fmt.Sprintf("Total metric families: %d", totalMetrics))
+	}
+
+	if len(summaryParts) == 0 {
+		return "No metrics data available"
+	}
+
+	return strings.Join(summaryParts, " | ")
+}
+
+// formatUptime converts a duration to a human-readable uptime string
+func formatUptime(duration time.Duration) string {
+	totalSeconds := int(duration.Seconds())
+
+	if totalSeconds < 60 {
+		return fmt.Sprintf("%ds", totalSeconds)
+	}
+
+	hours := totalSeconds / 3600
+	minutes := (totalSeconds % 3600) / 60
+	seconds := totalSeconds % 60
+
+	if hours > 0 {
+		return fmt.Sprintf("%dh %dm %ds", hours, minutes, seconds)
+	}
+
+	return fmt.Sprintf("%dm %ds", minutes, seconds)
 }

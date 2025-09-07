@@ -421,3 +421,73 @@ curl -X POST "http://localhost:8080/kill" \
 }
 ```
 
+---
+
+## `/env` - Environment Variables Listing
+
+The `/env` endpoint returns a list of all environment variables available to the application. 
+
+### Parameters
+
+| Parameter | Type | Required | Default | Valid Values | Description |
+|-----------|------|----------|---------|--------------|-------------|
+| `format` | string | No | `json` | `json`, `text` | Output format for environment variables |
+
+### Request Examples
+
+#### GET Request with Query Parameters
+```bash
+# List all environment variables in JSON format (default)
+curl "http://localhost:8080/env?token=your-secret-token"
+
+# List all environment variables in text format
+curl "http://localhost:8080/env?format=text&token=your-secret-token"
+```
+
+#### POST Request with JSON Body
+```bash
+# List environment variables using JSON payload
+curl -X POST "http://localhost:8080/env" \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: your-secret-token" \
+  -d '{
+    "format": "json"
+  }'
+```
+
+### Response Examples
+
+#### JSON Response (Default)
+```json
+{
+  "format": "json",
+  "count": 45,
+  "environment_variables": {
+    "PATH": "/usr/local/bin:/usr/bin:/bin",
+    "HOME": "/home/user",
+    "USER": "appuser",
+    "KUBERNETES_SERVICE_HOST": "10.96.0.1",
+    "KUBERNETES_SERVICE_PORT": "443",
+    "NODE_NAME": "worker-node-1",
+    "POD_NAME": "dummybox-deployment-abc123",
+    "NAMESPACE": "default"
+  }
+}
+```
+
+#### Text Response (`format=text`)
+```
+Environment Variables (45 total):
+
+HOME=/home/user
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_SERVICE_PORT=443
+NAMESPACE=default
+NODE_NAME=worker-node-1
+PATH=/usr/local/bin:/usr/bin:/bin
+POD_NAME=dummybox-deployment-abc123
+USER=appuser
+```
+
+---
+

@@ -141,6 +141,13 @@ Allocates memory to simulate memory pressure for testing OOM conditions and reso
 - `duration` (0-3600s, 0=forever)
 - `format` (json/text)
 
+### `/env` - Environment Variables Listing
+
+Returns all environment variables available to the application for debugging configuration issues and auditing environment exposure.
+
+**Parameters**:
+- `format` (json/text): Output format
+
 ### `/kill` - Process Termination
 
 Terminates the application with a configurable exit code and delay, useful for testing graceful shutdown, failover mechanisms, and container restart policies.

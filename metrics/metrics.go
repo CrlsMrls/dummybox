@@ -3,6 +3,7 @@ package metrics
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -84,4 +85,74 @@ type loggingResponseWriter struct {
 func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.statusCode = code
 	lrw.ResponseWriter.WriteHeader(code)
+}
+
+// GetMetricsInfo returns current metrics information as a map
+func GetMetricsInfo() map[string]interface{} {
+	if registry == nil {
+		return map[string]interface{}{
+			"status": "metrics not initialized",
+		}
+	}
+
+	metricsInfo := make(map[string]interface{})
+
+	// Gather metrics from the registry
+	metricFamilies, err := registry.Gather()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to gather metrics")
+		return map[string]interface{}{
+			"status": "error gathering metrics",
+			"error":  err.Error(),
+		}
+	}
+
+	// Process HTTP request metrics
+	httpMetrics := make(map[string]interface{})
+	totalRequests := 0.0
+
+	// Process Go runtime metrics
+	runtimeMetrics := make(map[string]interface{})
+
+	// Process each metric family
+	for _, mf := range metricFamilies {
+		metricName := mf.GetName()
+
+		switch {
+		case strings.HasPrefix(metricName, "http_requests_total"):
+			// Sum up all HTTP requests
+			for _, metric := range mf.GetMetric() {
+				if metric.Counter != nil {
+					totalRequests += metric.Counter.GetValue()
+				}
+			}
+			httpMetrics["total_requests"] = totalRequests
+
+		case strings.HasPrefix(metricName, "go_goroutines"):
+			if len(mf.GetMetric()) > 0 && mf.GetMetric()[0].Gauge != nil {
+				runtimeMetrics["goroutines"] = int(mf.GetMetric()[0].Gauge.GetValue())
+			}
+
+		case strings.HasPrefix(metricName, "go_memstats_alloc_bytes"):
+			if len(mf.GetMetric()) > 0 && mf.GetMetric()[0].Gauge != nil {
+				runtimeMetrics["allocated_bytes"] = int64(mf.GetMetric()[0].Gauge.GetValue())
+			}
+
+		case strings.HasPrefix(metricName, "go_memstats_sys_bytes"):
+			if len(mf.GetMetric()) > 0 && mf.GetMetric()[0].Gauge != nil {
+				runtimeMetrics["system_bytes"] = int64(mf.GetMetric()[0].Gauge.GetValue())
+			}
+
+		case strings.HasPrefix(metricName, "process_resident_memory_bytes"):
+			if len(mf.GetMetric()) > 0 && mf.GetMetric()[0].Gauge != nil {
+				runtimeMetrics["resident_memory_bytes"] = int64(mf.GetMetric()[0].Gauge.GetValue())
+			}
+		}
+	}
+
+	metricsInfo["http"] = httpMetrics
+	metricsInfo["runtime"] = runtimeMetrics
+	metricsInfo["total_metrics_collected"] = len(metricFamilies)
+
+	return metricsInfo
 }
